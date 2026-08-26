@@ -3,8 +3,8 @@ import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'health';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'health') => void;
+  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients') => void;
   onLogout: () => void;
 }
 
@@ -16,7 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   return (
     <nav className="navbar">
-      <div className="nav-brand" onClick={() => onNavigate(currentUser ? 'profile' : 'login')}>
+      <div className="nav-brand" onClick={() => onNavigate(currentUser ? 'patients' : 'login')}>
         <div className="brand-logo">&#10010;</div>
         <span className="brand-title">DentalCare Management</span>
       </div>
@@ -32,6 +32,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {currentUser ? (
           <>
+            <button
+              className={`nav-btn ${activeView === 'patients' ? 'active' : ''}`}
+              onClick={() => onNavigate('patients')}
+              id="nav-btn-patients"
+            >
+              Patients
+            </button>
             <button
               className={`nav-btn ${activeView === 'profile' ? 'active' : ''}`}
               onClick={() => onNavigate('profile')}

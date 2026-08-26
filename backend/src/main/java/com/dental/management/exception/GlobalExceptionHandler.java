@@ -37,6 +37,39 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.NOT_FOUND.value());
+        errorBody.put("error", "Not Found");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody);
+    }
+
+    @ExceptionHandler(DuplicatePatientNumberException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicatePatientNumber(DuplicatePatientNumberException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Patient Number Already Exists");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(PatientDeletionException.class)
+    public ResponseEntity<Map<String, Object>> handlePatientDeletion(PatientDeletionException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Cannot Delete Patient");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateUsername(DuplicateUsernameException ex) {
         Map<String, Object> errorBody = new HashMap<>();

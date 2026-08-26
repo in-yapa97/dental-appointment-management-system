@@ -44,3 +44,28 @@ export interface SystemHealth {
   timestamp: string;
   version: string;
 }
+
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+
+export interface Patient {
+  id: number;
+  patientNumber: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: Gender;
+  phone: string;
+  email?: string | null;
+  address?: string | null;
+  createdAt: string;
+}
+
+export interface PatientRequest {
+  patientNumber: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: Gender;
+  phone: string;
+  email?: string;
+  address?: string;
+}
+

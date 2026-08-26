@@ -7,10 +7,11 @@ import { Navbar } from './components/Navbar';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { UserProfilePage } from './pages/UserProfilePage';
+import { PatientsPage } from './pages/PatientsPage';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getStoredUser());
-  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health'>('login');
+  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients'>('login');
   const [notice, setNotice] = useState<string | null>(null);
 
   // System Health state (retained from Milestone 0)
@@ -23,7 +24,7 @@ export const App: React.FC = () => {
       authService.getCurrentUser()
         .then((user) => {
           setCurrentUser(user);
-          setActiveView('profile');
+          setActiveView('patients');
         })
         .catch(() => {
           authService.logout();
@@ -37,7 +38,7 @@ export const App: React.FC = () => {
 
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
-    setActiveView('profile');
+    setActiveView('patients');
     setNotice(`Welcome back, ${user.fullName}!`);
   };
 
@@ -72,7 +73,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         activeView={activeView}
         onNavigate={(view) => {
-          if (view === 'profile' && !currentUser) {
+          if ((view === 'profile' || view === 'patients') && !currentUser) {
             setActiveView('login');
           } else {
             setActiveView(view);
@@ -113,7 +114,12 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* VIEW 3: AUTHENTICATED USER PROFILE */}
+        {/* VIEW 3: PATIENT MANAGEMENT */}
+        {activeView === 'patients' && currentUser && (
+          <PatientsPage />
+        )}
+
+        {/* VIEW 4: AUTHENTICATED USER PROFILE */}
         {activeView === 'profile' && currentUser && (
           <UserProfilePage
             user={currentUser}
