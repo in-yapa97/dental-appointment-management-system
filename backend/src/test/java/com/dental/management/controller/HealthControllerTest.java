@@ -17,7 +17,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.dental.management.config.SecurityConfig;
+import com.dental.management.security.JwtAuthenticationEntryPoint;
+import com.dental.management.security.JwtAuthenticationFilter;
+import com.dental.management.security.JwtUtils;
+import org.springframework.context.annotation.Import;
+
 @WebMvcTest(HealthController.class)
+@Import({SecurityConfig.class, JwtAuthenticationEntryPoint.class, JwtAuthenticationFilter.class, JwtUtils.class})
 class HealthControllerTest {
 
     @Autowired

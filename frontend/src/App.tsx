@@ -1,117 +1,214 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import { SystemHealth } from './types';
+import { User, SystemHealth } from './types';
+import { authService } from './services/authService';
 import { getSystemHealth } from './services/healthService';
+import { Navbar } from './components/Navbar';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { UserProfilePage } from './pages/UserProfilePage';
 
 export const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(authService.getStoredUser());
+  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health'>('login');
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // System Health state (retained from Milestone 0)
   const [health, setHealth] = useState<SystemHealth | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [healthLoading, setHealthLoading] = useState<boolean>(false);
+  const [healthError, setHealthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authService.isAuthenticated()) {
+      authService.getCurrentUser()
+        .then((user) => {
+          setCurrentUser(user);
+          setActiveView('profile');
+        })
+        .catch(() => {
+          authService.logout();
+          setCurrentUser(null);
+          setActiveView('login');
+        });
+    } else {
+      setActiveView('login');
+    }
+  }, []);
+
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    setActiveView('profile');
+    setNotice(`Welcome back, ${user.fullName}!`);
+  };
+
+  const handleRegisterSuccess = (message: string) => {
+    setNotice(message);
+    setActiveView('login');
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
+    setCurrentUser(null);
+    setActiveView('login');
+    setNotice('You have been logged out.');
+  };
 
   const handleCheckHealth = async () => {
-    setLoading(true);
-    setError(null);
+    setHealthLoading(true);
+    setHealthError(null);
     try {
       const data = await getSystemHealth();
       setHealth(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to reach backend API');
+      setHealthError(err instanceof Error ? err.message : 'Failed to reach backend API');
     } finally {
-      setLoading(false);
+      setHealthLoading(false);
     }
   };
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <span className="badge-milestone">Milestone 0 &bull; Project Foundation</span>
-        <h1 className="app-title">Dental Appointment &amp; Patient Management System</h1>
-        <p className="app-subtitle">
-          University Assessment Project &bull; Architecture and Foundation Baseline
-        </p>
-      </header>
+    <div className="app-layout">
+      <Navbar
+        currentUser={currentUser}
+        activeView={activeView}
+        onNavigate={(view) => {
+          if (view === 'profile' && !currentUser) {
+            setActiveView('login');
+          } else {
+            setActiveView(view);
+          }
+          setNotice(null);
+        }}
+        onLogout={handleLogout}
+      />
 
-      <section className="status-card">
-        <div className="status-header">
-          <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Backend Connectivity Check</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Verify connectivity with the Spring Boot REST API (<code>/api/v1/health</code>)
-            </p>
-          </div>
-          <button
-            className="check-btn"
-            onClick={handleCheckHealth}
-            disabled={loading}
-            id="btn-check-health"
-          >
-            {loading ? 'Checking...' : 'Check Status'}
-          </button>
-        </div>
-
-        {health && (
-          <div>
-            <div className="status-indicator ready" style={{ marginBottom: '0.75rem' }}>
-              <span className="pulse-dot"></span>
-              Backend Status: {health.status}
-            </div>
-            <pre className="response-box">{JSON.stringify(health, null, 2)}</pre>
+      <main className="main-content">
+        {notice && (
+          <div className="alert-box alert-success banner-notice">
+            <span className="alert-icon">&#10003;</span>
+            <span>{notice}</span>
+            <button className="close-notice-btn" onClick={() => setNotice(null)}>&times;</button>
           </div>
         )}
 
-        {error && (
-          <div>
-            <div className="status-indicator idle" style={{ marginBottom: '0.75rem' }}>
-              <span className="pulse-dot"></span>
-              Connection Notice: Backend not reachable or offline
+        {/* VIEW 1: LOGIN */}
+        {activeView === 'login' && !currentUser && (
+          <LoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onNavigateToRegister={() => {
+              setActiveView('register');
+              setNotice(null);
+            }}
+          />
+        )}
+
+        {/* VIEW 2: REGISTER */}
+        {activeView === 'register' && !currentUser && (
+          <RegisterPage
+            onRegisterSuccess={handleRegisterSuccess}
+            onNavigateToLogin={() => {
+              setActiveView('login');
+              setNotice(null);
+            }}
+          />
+        )}
+
+        {/* VIEW 3: AUTHENTICATED USER PROFILE */}
+        {activeView === 'profile' && currentUser && (
+          <UserProfilePage
+            user={currentUser}
+            onUserUpdated={setCurrentUser}
+            onLogout={handleLogout}
+          />
+        )}
+
+        {/* VIEW 4: SYSTEM HEALTH & ARCHITECTURE (M0 / M1 / M2 status) */}
+        {activeView === 'health' && (
+          <div className="health-section">
+            <section className="status-card">
+              <div className="status-header">
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Backend Connectivity Check</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    Verify connectivity with Spring Boot REST API (<code>/api/v1/health</code>)
+                  </p>
+                </div>
+                <button
+                  className="check-btn"
+                  onClick={handleCheckHealth}
+                  disabled={healthLoading}
+                  id="btn-check-health"
+                >
+                  {healthLoading ? 'Checking...' : 'Check Status'}
+                </button>
+              </div>
+
+              {health && (
+                <div>
+                  <div className="status-indicator ready" style={{ marginBottom: '0.75rem' }}>
+                    <span className="pulse-dot"></span>
+                    Backend Status: {health.status}
+                  </div>
+                  <pre className="response-box">{JSON.stringify(health, null, 2)}</pre>
+                </div>
+              )}
+
+              {healthError && (
+                <div>
+                  <div className="status-indicator idle" style={{ marginBottom: '0.75rem' }}>
+                    <span className="pulse-dot"></span>
+                    Connection Notice: Backend not reachable or offline
+                  </div>
+                  <p style={{ fontSize: '0.85rem', color: '#b45309' }}>{healthError}</p>
+                </div>
+              )}
+            </section>
+
+            <div className="grid-cards" style={{ marginTop: '1.5rem' }}>
+              <div className="card">
+                <h3 className="card-title">Milestone 2 Security</h3>
+                <p className="card-content">
+                  Stateless JWT authentication with HMAC-SHA256, BCrypt password hashing, and role-based access control.
+                </p>
+                <ul className="tech-list">
+                  <li className="tech-tag">Spring Security 6</li>
+                  <li className="tech-tag">JJWT 0.12</li>
+                  <li className="tech-tag">BCrypt</li>
+                  <li className="tech-tag">Stateless Session</li>
+                </ul>
+              </div>
+
+              <div className="card">
+                <h3 className="card-title">Persistence &amp; Domain</h3>
+                <p className="card-content">
+                  Domain entity model mapping users, patients, dentists, treatments, appointments, and bills in PostgreSQL.
+                </p>
+                <ul className="tech-list">
+                  <li className="tech-tag">PostgreSQL 17</li>
+                  <li className="tech-tag">Spring Data JPA</li>
+                  <li className="tech-tag">Jakarta Validation</li>
+                  <li className="tech-tag">6 Entities</li>
+                </ul>
+              </div>
+
+              <div className="card">
+                <h3 className="card-title">Scope Discipline</h3>
+                <p className="card-content">
+                  Milestone 2 strictly implements user authentication and session management. Business domains remain deferred to future milestones.
+                </p>
+                <ul className="tech-list">
+                  <li className="tech-tag">No Mock Tokens</li>
+                  <li className="tech-tag">Safe DTOs</li>
+                  <li className="tech-tag">Zero Leaked Hashes</li>
+                </ul>
+              </div>
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#b45309' }}>{error}</p>
           </div>
         )}
-      </section>
-
-      <div className="grid-cards">
-        <div className="card">
-          <h3 className="card-title">Frontend Stack</h3>
-          <p className="card-content">
-            Modern Single Page Application structure ready for patient management views and scheduling interfaces.
-          </p>
-          <ul className="tech-list">
-            <li className="tech-tag">React 18</li>
-            <li className="tech-tag">TypeScript</li>
-            <li className="tech-tag">Vite 5</li>
-            <li className="tech-tag">Vanilla CSS</li>
-          </ul>
-        </div>
-
-        <div className="card">
-          <h3 className="card-title">Backend Architecture</h3>
-          <p className="card-content">
-            Layered architecture with thin REST controllers, decoupled service logic, and Spring Data JPA persistence.
-          </p>
-          <ul className="tech-list">
-            <li className="tech-tag">Java 17 LTS</li>
-            <li className="tech-tag">Spring Boot 3.3</li>
-            <li className="tech-tag">Apache Maven</li>
-            <li className="tech-tag">PostgreSQL</li>
-          </ul>
-        </div>
-
-        <div className="card">
-          <h3 className="card-title">Scope Discipline</h3>
-          <p className="card-content">
-            Milestone 0 establishes solely the project skeleton and communication channels. No domain features are active yet.
-          </p>
-          <ul className="tech-list">
-            <li className="tech-tag">Zero Mock Auth</li>
-            <li className="tech-tag">Zero Fake Data</li>
-            <li className="tech-tag">Clean Boundaries</li>
-          </ul>
-        </div>
-      </div>
+      </main>
 
       <footer className="app-footer">
-        Dental Appointment and Patient Management System &bull; Milestone 0 Foundation Verified
+        Dental Appointment and Patient Management System &bull; Milestone 2 Authentication &amp; User Management
       </footer>
     </div>
   );
