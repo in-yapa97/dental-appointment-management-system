@@ -93,4 +93,55 @@ class AppointmentRepositoryTest {
             appointmentRepository.saveAndFlush(a2);
         });
     }
+
+    @Test
+    @DisplayName("isDentistBooked accurately detects schedule conflicts excluding cancelled appointments")
+    void testIsDentistBooked() {
+        Patient patient = entityManager.persist(new Patient("PAT-700", "P700", LocalDate.of(1980, 1, 1),
+                Gender.FEMALE, "+1-555-123-0000", null, null));
+        Dentist dentist = entityManager.persist(new Dentist("DEN-700", "D700", "Orthodontics",
+                "+1-555-123-1111", null));
+        Treatment treatment = entityManager.persist(new Treatment("TRT-700", "T700", null, new BigDecimal("80.00")));
+
+        LocalDate date = LocalDate.of(2026, 10, 5);
+        LocalTime time = LocalTime.of(11, 0);
+
+        // Before booking: should be free
+        assertFalse(appointmentRepository.isDentistBooked(dentist.getId(), date, time, AppointmentStatus.CANCELLED, null));
+
+        // Book slot
+        Appointment a1 = appointmentRepository.saveAndFlush(new Appointment("APP-701", patient, dentist, treatment,
+                date, time, AppointmentStatus.SCHEDULED, null));
+
+        // Now should be booked
+        assertTrue(appointmentRepository.isDentistBooked(dentist.getId(), date, time, AppointmentStatus.CANCELLED, null));
+
+        // When excluding current appointment id (for updates): should be free
+        assertFalse(appointmentRepository.isDentistBooked(dentist.getId(), date, time, AppointmentStatus.CANCELLED, a1.getId()));
+
+        // If cancelled: should be free
+        a1.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.saveAndFlush(a1);
+        assertFalse(appointmentRepository.isDentistBooked(dentist.getId(), date, time, AppointmentStatus.CANCELLED, null));
+    }
+
+    @Test
+    @DisplayName("findWithFilters returns appointments matching criteria")
+    void testFindWithFilters() {
+        Patient patient = entityManager.persist(new Patient("PAT-800", "P800", LocalDate.of(1980, 1, 1),
+                Gender.MALE, "+1-555-123-0000", null, null));
+        Dentist dentist = entityManager.persist(new Dentist("DEN-800", "D800", "Surgery",
+                "+1-555-123-1111", null));
+        Treatment treatment = entityManager.persist(new Treatment("TRT-800", "T800", null, new BigDecimal("120.00")));
+
+        Appointment a1 = appointmentRepository.saveAndFlush(new Appointment("APP-801", patient, dentist, treatment,
+                LocalDate.of(2026, 11, 1), LocalTime.of(9, 30), AppointmentStatus.SCHEDULED, null));
+
+        List<Appointment> filtered = appointmentRepository.findWithFilters(patient.getId(), dentist.getId(), LocalDate.of(2026, 11, 1), AppointmentStatus.SCHEDULED);
+        assertEquals(1, filtered.size());
+        assertEquals("APP-801", filtered.get(0).getAppointmentNumber());
+
+        List<Appointment> noMatch = appointmentRepository.findWithFilters(patient.getId(), dentist.getId(), LocalDate.of(2026, 11, 2), AppointmentStatus.SCHEDULED);
+        assertTrue(noMatch.isEmpty());
+    }
 }

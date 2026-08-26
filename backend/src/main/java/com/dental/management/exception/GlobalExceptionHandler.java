@@ -70,6 +70,50 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
     }
 
+    @ExceptionHandler(DentistUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleDentistUnavailable(DentistUnavailableException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Dentist Unavailable");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(DuplicateAppointmentNumberException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateAppointmentNumber(DuplicateAppointmentNumberException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Appointment Number Already Exists");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(AppointmentDeletionException.class)
+    public ResponseEntity<Map<String, Object>> handleAppointmentDeletion(AppointmentDeletionException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Cannot Delete Appointment");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(InactiveResourceException.class)
+    public ResponseEntity<Map<String, Object>> handleInactiveResource(InactiveResourceException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.BAD_REQUEST.value());
+        errorBody.put("error", "Inactive Resource");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateUsername(DuplicateUsernameException ex) {
         Map<String, Object> errorBody = new HashMap<>();
