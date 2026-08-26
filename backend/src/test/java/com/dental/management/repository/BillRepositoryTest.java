@@ -102,4 +102,32 @@ class BillRepositoryTest {
             billRepository.saveAndFlush(b2);
         });
     }
+
+    @Test
+    @DisplayName("Reporting queries aggregate revenue and group by treatment correctly")
+    void testReportingAggregations() {
+        Appointment a1 = persistSampleAppointment("APP-R1");
+        Appointment a2 = persistSampleAppointment("APP-R2");
+
+        Bill b1 = new Bill("BILL-R1", a1, new BigDecimal("20.00"), new BigDecimal("60.00"),
+                new BigDecimal("80.00"), LocalDate.of(2026, 8, 1), BillStatus.PAID);
+        billRepository.saveAndFlush(b1);
+
+        Bill b2 = new Bill("BILL-R2", a2, new BigDecimal("10.00"), new BigDecimal("60.00"),
+                new BigDecimal("70.00"), LocalDate.of(2026, 8, 2), BillStatus.PENDING);
+        billRepository.saveAndFlush(b2);
+
+        BigDecimal paidTotal = billRepository.sumTotalAmountByStatus(BillStatus.PAID);
+        assertEquals(0, new BigDecimal("80.00").compareTo(paidTotal));
+
+        long paidCount = billRepository.countByStatus(BillStatus.PAID);
+        assertEquals(1, paidCount);
+
+        long pendingCount = billRepository.countByStatus(BillStatus.PENDING);
+        assertEquals(1, pendingCount);
+
+        var treatmentRevenue = billRepository.findTreatmentRevenue();
+        assertFalse(treatmentRevenue.isEmpty());
+        assertEquals("Checkup", treatmentRevenue.get(0).getTreatmentName());
+    }
 }

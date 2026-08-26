@@ -19,6 +19,10 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface MessageResponse {
+  message: string;
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -130,5 +134,94 @@ export interface TreatmentLookup {
   cost: number;
   active: boolean;
 }
+
+export type BillStatus = 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED';
+
+export interface Bill {
+  id: number;
+  billNumber: string;
+  appointmentId: number;
+  appointmentNumber: string;
+  patientId: number;
+  patientName: string;
+  patientNumber: string;
+  dentistId: number;
+  dentistName: string;
+  treatmentId: number;
+  treatmentName: string;
+  treatmentCode: string;
+  consultationFee: number;
+  treatmentAmount: number;
+  totalAmount: number;
+  billDate: string;
+  status: BillStatus;
+  createdAt: string;
+}
+
+export interface BillRequest {
+  appointmentId: number;
+  consultationFee?: number;
+  treatmentAmount?: number;
+  billDate?: string;
+  status?: BillStatus;
+}
+
+export interface ReceiptResponse {
+  receiptNumber: string;
+  billNumber: string;
+  appointmentNumber: string;
+  appointmentId: number;
+  patientName: string;
+  patientNumber: string;
+  patientPhone?: string;
+  patientEmail?: string;
+  dentistName: string;
+  dentistSpecialization?: string;
+  treatmentName: string;
+  treatmentCode: string;
+  consultationFee: number;
+  treatmentAmount: number;
+  totalAmount: number;
+  paymentStatus: BillStatus;
+  paymentDate: string;
+  issuedAt: string;
+  clinicName: string;
+  clinicAddress: string;
+  clinicContact: string;
+}
+
+export interface RevenueReportResponse {
+  totalRevenue: number;
+  paidAmount: number;
+  unpaidAmount: number;
+  totalBills: number;
+  paidBills: number;
+  pendingBills: number;
+  cancelledBills: number;
+  refundedBills: number;
+  fromDate?: string | null;
+  toDate?: string | null;
+}
+
+export interface PaymentStatusItem {
+  status: BillStatus;
+  count: number;
+  totalAmount: number;
+}
+
+export interface PaymentStatusReportResponse {
+  breakdown: PaymentStatusItem[];
+  totalCount: number;
+  totalAmount: number;
+}
+
+export interface TreatmentRevenueResponse {
+  treatmentId: number;
+  treatmentCode: string;
+  treatmentName: string;
+  billCount: number;
+  totalRevenue: number;
+}
+
 
 

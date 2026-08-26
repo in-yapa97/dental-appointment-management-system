@@ -114,6 +114,39 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
 
+    @ExceptionHandler(DuplicateBillException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateBill(DuplicateBillException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Duplicate Bill");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(BillDeletionException.class)
+    public ResponseEntity<Map<String, Object>> handleBillDeletion(BillDeletionException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Cannot Delete Bill");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(InvalidPaymentStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidPaymentStatus(InvalidPaymentStatusException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.BAD_REQUEST.value());
+        errorBody.put("error", "Invalid Payment Status");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
+    }
+
     @ExceptionHandler(DuplicateUsernameException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateUsername(DuplicateUsernameException ex) {
         Map<String, Object> errorBody = new HashMap<>();

@@ -3,8 +3,8 @@ import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments') => void;
+  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports') => void;
   onLogout: () => void;
 }
 
@@ -45,6 +45,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="nav-btn-patients"
             >
               Patients
+            </button>
+            <button
+              className={`nav-btn ${activeView === 'billing' ? 'active' : ''}`}
+              onClick={() => onNavigate('billing')}
+              id="nav-btn-billing"
+            >
+              Billing
+            </button>
+            <button
+              className={`nav-btn ${activeView === 'reports' ? 'active' : ''}`}
+              onClick={() => onNavigate('reports')}
+              id="nav-btn-reports"
+            >
+              Reports
             </button>
             <button
               className={`nav-btn ${activeView === 'profile' ? 'active' : ''}`}

@@ -9,10 +9,12 @@ import { RegisterPage } from './pages/RegisterPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { PatientsPage } from './pages/PatientsPage';
 import { AppointmentsPage } from './pages/AppointmentsPage';
+import { BillingPage } from './pages/BillingPage';
+import { ReportsPage } from './pages/ReportsPage';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getStoredUser());
-  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments'>('login');
+  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports'>('login');
   const [notice, setNotice] = useState<string | null>(null);
 
   // System Health state (retained from Milestone 0)
@@ -74,7 +76,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         activeView={activeView}
         onNavigate={(view) => {
-          if ((view === 'profile' || view === 'patients' || view === 'appointments') && !currentUser) {
+          if (['profile', 'patients', 'appointments', 'billing', 'reports'].includes(view) && !currentUser) {
             setActiveView('login');
           } else {
             setActiveView(view);
@@ -125,7 +127,17 @@ export const App: React.FC = () => {
           <PatientsPage />
         )}
 
-        {/* VIEW 5: AUTHENTICATED USER PROFILE */}
+        {/* VIEW 5: BILLING & INVOICING */}
+        {activeView === 'billing' && currentUser && (
+          <BillingPage />
+        )}
+
+        {/* VIEW 6: CLINIC REPORTS */}
+        {activeView === 'reports' && currentUser && (
+          <ReportsPage />
+        )}
+
+        {/* VIEW 7: AUTHENTICATED USER PROFILE */}
         {activeView === 'profile' && currentUser && (
           <UserProfilePage
             user={currentUser}
