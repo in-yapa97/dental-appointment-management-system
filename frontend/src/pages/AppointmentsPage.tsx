@@ -9,6 +9,16 @@ import {
 } from '../types';
 import { appointmentService, AppointmentFilters } from '../services/appointmentService';
 import { patientService } from '../services/patientService';
+import {
+  CalendarCheck,
+  Calendar,
+  RotateCcw,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  Edit3,
+  Trash2,
+} from 'lucide-react';
 
 export const AppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -98,11 +108,12 @@ export const AppointmentsPage: React.FC = () => {
 
   const openBookModal = () => {
     setEditingAppointment(null);
+    const todayStr = new Date().toISOString().split('T')[0];
     setFormData({
       patientId: patients.length > 0 ? patients[0].id : 0,
       dentistId: dentists.length > 0 ? dentists[0].id : 0,
       treatmentId: treatments.length > 0 ? treatments[0].id : 0,
-      appointmentDate: new Date().toISOString().split('T')[0],
+      appointmentDate: todayStr,
       appointmentTime: '09:00',
       status: 'SCHEDULED',
       notes: '',
@@ -119,7 +130,7 @@ export const AppointmentsPage: React.FC = () => {
       dentistId: apt.dentistId,
       treatmentId: apt.treatmentId,
       appointmentDate: apt.appointmentDate,
-      appointmentTime: apt.appointmentTime.substring(0, 5),
+      appointmentTime: apt.appointmentTime,
       status: apt.status,
       notes: apt.notes || '',
     });
@@ -130,28 +141,35 @@ export const AppointmentsPage: React.FC = () => {
 
   const handleCheckAvailability = async () => {
     if (!formData.dentistId || !formData.appointmentDate || !formData.appointmentTime) {
-      setFormError('Please select dentist, date, and time before checking availability');
+      setFormError('Please select a dentist, date, and time slot to verify availability');
       return;
     }
-
     setCheckingAvailability(true);
     setFormError(null);
     try {
-      const res = await appointmentService.checkAvailability(
+      const isAvailable = await appointmentService.checkAvailability(
         formData.dentistId,
         formData.appointmentDate,
         formData.appointmentTime
       );
-      setAvailabilityResult({
-        checked: true,
-        available: res.available,
-        message: res.reason || (res.available ? 'Dentist is available!' : 'Dentist is already booked.'),
-      });
+      if (isAvailable) {
+        setAvailabilityResult({
+          checked: true,
+          available: true,
+          message: 'Selected time slot is OPEN and available for booking.',
+        });
+      } else {
+        setAvailabilityResult({
+          checked: true,
+          available: false,
+          message: 'Selected dentist already has a confirmed appointment at this time.',
+        });
+      }
     } catch (err: unknown) {
       setAvailabilityResult({
         checked: true,
         available: false,
-        message: err instanceof Error ? err.message : 'Availability check failed',
+        message: err instanceof Error ? err.message : 'Failed to verify slot availability',
       });
     } finally {
       setCheckingAvailability(false);
@@ -162,16 +180,16 @@ export const AppointmentsPage: React.FC = () => {
     e.preventDefault();
     setFormError(null);
 
-    if (!formData.patientId) {
-      setFormError('Patient is required');
+    if (!formData.patientId || formData.patientId === 0) {
+      setFormError('Please select a patient');
       return;
     }
-    if (!formData.dentistId) {
-      setFormError('Dentist is required');
+    if (!formData.dentistId || formData.dentistId === 0) {
+      setFormError('Please select a dentist');
       return;
     }
-    if (!formData.treatmentId) {
-      setFormError('Treatment procedure is required');
+    if (!formData.treatmentId || formData.treatmentId === 0) {
+      setFormError('Please select a treatment procedure');
       return;
     }
     if (!formData.appointmentDate) {
@@ -190,7 +208,7 @@ export const AppointmentsPage: React.FC = () => {
         dentistId: Number(formData.dentistId),
         treatmentId: Number(formData.treatmentId),
         appointmentDate: formData.appointmentDate,
-        appointmentTime: formData.appointmentTime.length === 5 ? `${formData.appointmentTime}:00` : formData.appointmentTime,
+        appointmentTime: formData.appointmentTime,
         status: formData.status,
         notes: formData.notes?.trim() || undefined,
       };
@@ -234,22 +252,23 @@ export const AppointmentsPage: React.FC = () => {
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Appointment Management</h1>
+          <h1 className="page-title">Appointment Calendar</h1>
           <p className="page-subtitle">Schedule procedures, manage bookings, and verify dentist availability</p>
         </div>
         <button
-          className="submit-btn add-patient-btn"
+          className="btn-primary"
           onClick={openBookModal}
           id="btn-book-appointment"
         >
-          + Book Appointment
+          <CalendarCheck size={16} />
+          <span>Book Appointment</span>
         </button>
       </div>
 
       {/* Notifications */}
       {notice && (
         <div className="alert-box alert-success banner-notice">
-          <span className="alert-icon">&#10003;</span>
+          <CheckCircle2 size={18} className="alert-icon" />
           <span>{notice}</span>
           <button className="close-notice-btn" onClick={() => setNotice(null)}>&times;</button>
         </div>
@@ -257,7 +276,7 @@ export const AppointmentsPage: React.FC = () => {
 
       {error && (
         <div className="alert-box alert-error banner-notice">
-          <span className="alert-icon">&#9888;</span>
+          <AlertCircle size={18} className="alert-icon" />
           <span>{error}</span>
           <button className="close-notice-btn" onClick={() => setError(null)}>&times;</button>
         </div>
@@ -326,11 +345,12 @@ export const AppointmentsPage: React.FC = () => {
 
         <div className="filter-actions">
           <button
-            className="nav-btn clear-filter-btn"
+            className="btn-secondary btn-sm"
             onClick={handleClearFilters}
             id="btn-clear-filters"
           >
-            Clear Filters
+            <RotateCcw size={14} />
+            <span>Reset</span>
           </button>
         </div>
       </div>
@@ -338,18 +358,18 @@ export const AppointmentsPage: React.FC = () => {
       {/* Appointments Table */}
       <div className="table-wrapper">
         {loading ? (
-          <div className="loading-state">
-            <span className="pulse-dot"></span>
+          <div className="table-loading">
+            <div className="spinner"></div>
             <span>Loading appointments...</span>
           </div>
         ) : appointments.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">&#128197;</div>
+            <Calendar size={42} style={{ color: '#94a3b8', marginBottom: '0.75rem' }} />
             <h3>No Appointments Found</h3>
             <p>No appointments match the selected filter criteria. Click "+ Book Appointment" to schedule one.</p>
           </div>
         ) : (
-          <table className="patients-table">
+          <table className="data-table patients-table">
             <thead>
               <tr>
                 <th>Appt #</th>
@@ -397,14 +417,14 @@ export const AppointmentsPage: React.FC = () => {
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <div className="table-actions">
+                    <div className="table-actions" style={{ justifyContent: 'flex-end', gap: '0.35rem' }}>
                       <button
                         className="action-btn action-view"
                         onClick={() => setViewingAppointment(a)}
                         title="View Details"
                         id={`btn-view-apt-${a.id}`}
                       >
-                        View
+                        <Eye size={14} />
                       </button>
                       <button
                         className="action-btn action-edit"
@@ -412,7 +432,7 @@ export const AppointmentsPage: React.FC = () => {
                         title="Edit Appointment"
                         id={`btn-edit-apt-${a.id}`}
                       >
-                        Edit
+                        <Edit3 size={14} />
                       </button>
                       <button
                         className="action-btn action-delete"
@@ -420,7 +440,7 @@ export const AppointmentsPage: React.FC = () => {
                         title="Delete / Cancel Appointment"
                         id={`btn-delete-apt-${a.id}`}
                       >
-                        Delete
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>

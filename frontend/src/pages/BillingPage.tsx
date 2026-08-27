@@ -8,6 +8,19 @@ import {
 } from '../types';
 import { billingService, BillFilters } from '../services/billingService';
 import { appointmentService } from '../services/appointmentService';
+import {
+  Receipt,
+  CheckCircle2,
+  AlertCircle,
+  DollarSign,
+  Clock,
+  CreditCard,
+  Search,
+  Printer,
+  RotateCcw,
+  Edit3,
+  Trash2,
+} from 'lucide-react';
 
 export const BillingPage: React.FC = () => {
   const [bills, setBills] = useState<Bill[]>([]);
@@ -83,39 +96,42 @@ export const BillingPage: React.FC = () => {
   };
 
   const openCreateModal = () => {
-    setFormError(null);
     setSelectedAppointmentId(0);
     setConsultationFee(0);
     setTreatmentAmount(0);
     setBillDate(new Date().toISOString().split('T')[0]);
     setBillStatus('PENDING');
+    setFormError(null);
     setShowCreateModal(true);
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAppointmentId) {
+    setFormError(null);
+
+    if (!selectedAppointmentId || selectedAppointmentId === 0) {
       setFormError('Please select an appointment to bill');
+      return;
+    }
+    if (consultationFee < 0 || treatmentAmount < 0) {
+      setFormError('Fees cannot be negative');
       return;
     }
 
     setSubmitting(true);
-    setFormError(null);
-
-    const payload: BillRequest = {
-      appointmentId: selectedAppointmentId,
-      consultationFee: Number(consultationFee),
-      treatmentAmount: Number(treatmentAmount),
-      billDate: billDate,
-      status: billStatus,
-    };
-
     try {
+      const payload: BillRequest = {
+        appointmentId: selectedAppointmentId,
+        consultationFee,
+        treatmentAmount,
+        billDate,
+        status: billStatus,
+      };
+
       const created = await billingService.createBill(payload);
-      setNotice(`Bill #${created.billNumber} created successfully!`);
+      setNotice(`Bill #${created.billNumber} created successfully! Total: $${Number(created.totalAmount).toFixed(2)}`);
       setShowCreateModal(false);
       fetchBills();
-      setTimeout(() => setNotice(null), 5000);
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Failed to create bill');
     } finally {
@@ -132,50 +148,48 @@ export const BillingPage: React.FC = () => {
         billDate: bill.billDate,
         status: newStatus,
       });
-      setNotice(`Bill #${bill.billNumber} updated to ${newStatus}`);
+      setNotice(`Bill #${bill.billNumber} status updated to ${newStatus}.`);
       fetchBills();
-      setUpdatingBill(null);
-      setTimeout(() => setNotice(null), 4000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to update bill status');
-      setTimeout(() => setError(null), 5000);
-    }
-  };
-
-  const openReceiptModal = async (billId: number) => {
-    try {
-      const receipt = await billingService.getReceipt(billId);
-      setViewingReceipt(receipt);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to retrieve receipt');
-      setTimeout(() => setError(null), 4000);
+      setError(err instanceof Error ? err.message : 'Failed to update status');
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deletingBill) return;
-
+    setSubmitting(true);
+    setError(null);
     try {
       await billingService.deleteBill(deletingBill.id);
       setNotice(`Bill #${deletingBill.billNumber} deleted successfully.`);
       setDeletingBill(null);
       fetchBills();
-      setTimeout(() => setNotice(null), 4000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to delete bill');
       setDeletingBill(null);
-      setTimeout(() => setError(null), 5000);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Derived statistics for summary pill cards
-  const totalBilled = bills.reduce((acc, b) => acc + (Number(b.totalAmount) || 0), 0);
+  const openReceiptModal = async (billId: number) => {
+    setError(null);
+    try {
+      const receipt = await billingService.getReceipt(billId);
+      setViewingReceipt(receipt);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch receipt');
+    }
+  };
+
+  // KPI Calculations
+  const totalBilled = bills.reduce((sum, b) => sum + (Number(b.totalAmount) || 0), 0);
   const totalCollected = bills
     .filter((b) => b.status === 'PAID')
-    .reduce((acc, b) => acc + (Number(b.totalAmount) || 0), 0);
+    .reduce((sum, b) => sum + (Number(b.totalAmount) || 0), 0);
   const pendingAmount = bills
     .filter((b) => b.status === 'PENDING')
-    .reduce((acc, b) => acc + (Number(b.totalAmount) || 0), 0);
+    .reduce((sum, b) => sum + (Number(b.totalAmount) || 0), 0);
 
   const getStatusBadgeClass = (status: BillStatus): string => {
     switch (status) {
@@ -199,171 +213,241 @@ export const BillingPage: React.FC = () => {
   return (
     <div className="billing-page-container">
       {/* Header */}
-      <div className="page-header-row">
+      <div className="page-header">
         <div>
-          <h1 className="page-title">Billing & Invoicing</h1>
-          <p className="page-subtitle">Manage patient invoices, payment status, receipts, and fee breakdowns.</p>
+          <h1 className="page-title">Invoicing &amp; Billing</h1>
+          <p className="page-subtitle">Manage patient invoices, payment status, receipts, and fee breakdowns</p>
         </div>
         <div className="header-actions">
           <button className="btn-primary" onClick={openCreateModal}>
-            + Create Bill
+            <Receipt size={16} />
+            <span>Issue Invoice</span>
           </button>
         </div>
       </div>
 
       {/* Notice & Error banners */}
-      {notice && <div className="banner-success">{notice}</div>}
-      {error && <div className="banner-error">{error}</div>}
+      {notice && (
+        <div className="alert-box alert-success banner-notice">
+          <CheckCircle2 size={18} className="alert-icon" />
+          <span>{notice}</span>
+          <button className="close-notice-btn" onClick={() => setNotice(null)}>&times;</button>
+        </div>
+      )}
+      {error && (
+        <div className="alert-box alert-error banner-notice">
+          <AlertCircle size={18} className="alert-icon" />
+          <span>{error}</span>
+          <button className="close-notice-btn" onClick={() => setError(null)}>&times;</button>
+        </div>
+      )}
 
       {/* Summary KPI Pills */}
-      <div className="billing-kpi-row">
-        <div className="kpi-card kpi-total">
-          <span className="kpi-label">Total Invoiced</span>
+      <div className="dashboard-kpi-grid" style={{ marginBottom: '1.5rem' }}>
+        <div className="kpi-card">
+          <div className="kpi-top">
+            <span className="kpi-label">Total Invoiced</span>
+            <div className="kpi-icon-box icon-sky">
+              <CreditCard size={20} />
+            </div>
+          </div>
           <span className="kpi-value">${totalBilled.toFixed(2)}</span>
-          <span className="kpi-subtext">{bills.length} Total Bills</span>
+          <div className="kpi-footer">
+            <span className="kpi-subtext">{bills.length} total bills</span>
+          </div>
         </div>
-        <div className="kpi-card kpi-paid">
-          <span className="kpi-label">Collected (Paid)</span>
+        <div className="kpi-card">
+          <div className="kpi-top">
+            <span className="kpi-label">Collected (Paid)</span>
+            <div className="kpi-icon-box icon-emerald">
+              <DollarSign size={20} />
+            </div>
+          </div>
           <span className="kpi-value">${totalCollected.toFixed(2)}</span>
-          <span className="kpi-subtext">{bills.filter((b) => b.status === 'PAID').length} Paid Bills</span>
+          <div className="kpi-footer">
+            <span className="kpi-subtext">{bills.filter((b) => b.status === 'PAID').length} paid bills</span>
+          </div>
         </div>
-        <div className="kpi-card kpi-pending">
-          <span className="kpi-label">Outstanding (Pending)</span>
+        <div className="kpi-card">
+          <div className="kpi-top">
+            <span className="kpi-label">Outstanding (Pending)</span>
+            <div className="kpi-icon-box icon-amber">
+              <Clock size={20} />
+            </div>
+          </div>
           <span className="kpi-value">${pendingAmount.toFixed(2)}</span>
-          <span className="kpi-subtext">{bills.filter((b) => b.status === 'PENDING').length} Unpaid</span>
+          <div className="kpi-footer">
+            <span className="kpi-subtext">{bills.filter((b) => b.status === 'PENDING').length} awaiting payment</span>
+          </div>
         </div>
       </div>
 
       {/* Filters Card */}
-      <div className="filter-card">
-        <div className="filter-grid">
-          <div className="filter-group">
-            <label>Search Bill #</label>
+      <div className="filter-bar-card">
+        <div className="filter-item">
+          <label className="filter-label">Search Bill #</label>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search size={16} style={{ position: 'absolute', left: '0.85rem', color: '#94a3b8', pointerEvents: 'none' }} />
             <input
               type="text"
+              className="form-input filter-select"
+              style={{ paddingLeft: '2.5rem' }}
               placeholder="e.g. BIL-..."
               value={filters.billNumber || ''}
               onChange={(e) => setFilters({ ...filters, billNumber: e.target.value })}
+              id="filter-bill-number"
             />
           </div>
+        </div>
 
-          <div className="filter-group">
-            <label>Payment Status</label>
-            <select
-              value={filters.status || ''}
-              onChange={(e) => setFilters({ ...filters, status: (e.target.value as BillStatus) || undefined })}
-            >
-              <option value="">All Statuses</option>
-              <option value="PENDING">PENDING</option>
-              <option value="PAID">PAID</option>
-              <option value="CANCELLED">CANCELLED</option>
-              <option value="REFUNDED">REFUNDED</option>
-            </select>
-          </div>
+        <div className="filter-item">
+          <label className="filter-label">Payment Status</label>
+          <select
+            className="form-input filter-select"
+            value={filters.status || ''}
+            onChange={(e) => setFilters({ ...filters, status: (e.target.value as BillStatus) || undefined })}
+            id="filter-bill-status"
+          >
+            <option value="">All Statuses</option>
+            <option value="PENDING">PENDING</option>
+            <option value="PAID">PAID</option>
+            <option value="CANCELLED">CANCELLED</option>
+            <option value="REFUNDED">REFUNDED</option>
+          </select>
+        </div>
 
-          <div className="filter-group">
-            <label>Bill Date</label>
-            <input
-              type="date"
-              value={filters.date || ''}
-              onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-            />
-          </div>
+        <div className="filter-item">
+          <label className="filter-label">Bill Date</label>
+          <input
+            type="date"
+            className="form-input filter-select"
+            value={filters.date || ''}
+            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+            id="filter-bill-date"
+          />
+        </div>
 
-          <div className="filter-group filter-actions-group">
-            <label>&nbsp;</label>
-            <button
-              className="btn-secondary"
-              onClick={() => setFilters({ status: undefined, date: '', billNumber: '' })}
-            >
-              Reset Filters
-            </button>
-          </div>
+        <div className="filter-actions">
+          <button
+            className="btn-secondary btn-sm"
+            onClick={() => setFilters({ status: undefined, date: '', billNumber: '' })}
+            id="btn-reset-bill-filters"
+          >
+            <RotateCcw size={14} />
+            <span>Reset</span>
+          </button>
         </div>
       </div>
 
       {/* Bills Table */}
       <div className="table-wrapper">
         {loading ? (
-          <div className="table-loading">Loading bills...</div>
+          <div className="table-loading">
+            <div className="spinner"></div>
+            <span>Loading billing records...</span>
+          </div>
         ) : bills.length === 0 ? (
           <div className="empty-state">
-            <h3>No billing records found</h3>
-            <p>Try clearing filters or generate a new bill for an appointment.</p>
+            <Receipt size={42} style={{ color: '#94a3b8', marginBottom: '0.75rem' }} />
+            <h3>No Billing Records Found</h3>
+            <p>Try clearing filters or click "+ Issue Invoice" to generate a bill for an appointment.</p>
           </div>
         ) : (
-          <table className="data-table">
+          <table className="data-table patients-table">
             <thead>
               <tr>
-                <th>Bill #</th>
-                <th>Date</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Bill #</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Date</th>
                 <th>Patient</th>
                 <th>Dentist</th>
                 <th>Treatment</th>
-                <th style={{ textAlign: 'right' }}>Consult Fee</th>
-                <th style={{ textAlign: 'right' }}>Treatment Fee</th>
-                <th style={{ textAlign: 'right' }}>Total</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'center' }}>Actions</th>
+                <th style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Consult</th>
+                <th style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Treatment Fee</th>
+                <th style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Total</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Status</th>
+                <th style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {bills.map((bill) => (
-                <tr key={bill.id}>
-                  <td className="font-semibold text-primary">{bill.billNumber}</td>
-                  <td>{bill.billDate}</td>
+                <tr key={bill.id} id={`bill-row-${bill.id}`}>
                   <td>
-                    <div><strong>{bill.patientName}</strong></div>
-                    <div className="text-muted text-xs">{bill.patientNumber}</div>
+                    <span className="patient-number-badge" style={{ whiteSpace: 'nowrap' }}>{bill.billNumber}</span>
                   </td>
-                  <td>{bill.dentistName}</td>
-                  <td>
-                    <div>{bill.treatmentName}</div>
-                    <div className="text-muted text-xs">{bill.treatmentCode}</div>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{bill.billDate}</div>
                   </td>
-                  <td style={{ textAlign: 'right' }}>${Number(bill.consultationFee).toFixed(2)}</td>
-                  <td style={{ textAlign: 'right' }}>${Number(bill.treatmentAmount).toFixed(2)}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 600 }}>${Number(bill.totalAmount).toFixed(2)}</td>
                   <td>
+                    <div className="patient-name-cell">
+                      <span className="cell-fullname">{bill.patientName}</span>
+                      <span className="cell-subtext">{bill.patientNumber}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="cell-fullname" style={{ whiteSpace: 'nowrap' }}>{bill.dentistName}</div>
+                  </td>
+                  <td>
+                    <div className="patient-name-cell">
+                      <span className="cell-fullname">{bill.treatmentName}</span>
+                      <span className="cell-subtext">{bill.treatmentCode}</span>
+                    </div>
+                  </td>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    ${Number(bill.consultationFee).toFixed(2)}
+                  </td>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    ${Number(bill.treatmentAmount).toFixed(2)}
+                  </td>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap', fontWeight: 700, color: '#0284c7' }}>
+                    ${Number(bill.totalAmount).toFixed(2)}
+                  </td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
                     <span className={`status-badge ${getStatusBadgeClass(bill.status)}`}>
                       {bill.status}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <div className="table-actions-cell">
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions" style={{ justifyContent: 'flex-end', gap: '0.35rem', flexWrap: 'nowrap' }}>
                       <button
-                        className="btn-action-receipt"
+                        className="action-btn action-view"
                         title="View Official Receipt"
                         onClick={() => openReceiptModal(bill.id)}
+                        id={`btn-receipt-${bill.id}`}
                       >
-                        Receipt
+                        <Printer size={14} />
+                        <span>Receipt</span>
                       </button>
 
                       {bill.status === 'PENDING' && (
                         <button
-                          className="btn-action-pay"
+                          className="action-btn action-edit"
                           title="Mark as Paid"
                           onClick={() => handleQuickStatusUpdate(bill, 'PAID')}
+                          id={`btn-pay-${bill.id}`}
                         >
-                          Mark Paid
+                          <CheckCircle2 size={14} />
+                          <span>Pay</span>
                         </button>
                       )}
 
                       <button
-                        className="btn-action-edit"
+                        className="action-btn action-view"
                         title="Update Status"
                         onClick={() => setUpdatingBill(bill)}
+                        id={`btn-status-${bill.id}`}
                       >
-                        Status
+                        <Edit3 size={14} />
                       </button>
 
                       <button
-                        className="btn-action-delete"
+                        className="action-btn action-delete"
                         title={bill.status === 'PAID' ? 'Paid bills cannot be deleted' : 'Delete bill'}
                         disabled={bill.status === 'PAID'}
                         onClick={() => setDeletingBill(bill)}
+                        id={`btn-delete-bill-${bill.id}`}
+                        style={bill.status === 'PAID' ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
                       >
-                        Delete
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -376,112 +460,123 @@ export const BillingPage: React.FC = () => {
 
       {/* CREATE BILL MODAL */}
       {showCreateModal && (
-        <div className="modal-backdrop" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content auth-card modal-card" style={{ maxWidth: '600px' }}>
             <div className="modal-header">
-              <h2>Issue Appointment Invoice</h2>
-              <button className="modal-close" onClick={() => setShowCreateModal(false)}>
-                &times;
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <Receipt size={22} style={{ color: '#0284c7' }} />
+                <h2 className="auth-title" style={{ fontSize: '1.25rem', margin: 0 }}>Issue Appointment Invoice</h2>
+              </div>
+              <button className="modal-close" onClick={() => setShowCreateModal(false)}>&times;</button>
             </div>
 
-            <form onSubmit={handleCreateSubmit}>
-              <div className="modal-body">
-                {formError && <div className="banner-error mb-4">{formError}</div>}
+            {formError && (
+              <div className="alert-box alert-error" style={{ marginBottom: '1rem' }}>
+                <AlertCircle size={16} />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateSubmit} className="auth-form" noValidate>
+              <div className="form-group">
+                <label className="form-label">Select Appointment *</label>
+                <select
+                  className="form-input"
+                  value={selectedAppointmentId}
+                  onChange={(e) => handleAppointmentChange(Number(e.target.value))}
+                  required
+                >
+                  <option value="0">-- Choose an unbilled appointment --</option>
+                  {availableAppointments.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.appointmentNumber} — {a.patientName} ({a.treatmentName}, {a.appointmentDate})
+                    </option>
+                  ))}
+                </select>
+                {availableAppointments.length === 0 && (
+                  <small style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                    No unbilled appointments found. Existing appointments already have bills.
+                  </small>
+                )}
+              </div>
+
+              {selectedAppointmentId > 0 && (
+                <div className="selected-appt-preview" style={{ marginBottom: '1rem' }}>
+                  {(() => {
+                    const appt = appointments.find((a) => a.id === selectedAppointmentId);
+                    if (!appt) return null;
+                    return (
+                      <div className="preview-card" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem 1rem', fontSize: '0.875rem' }}>
+                        <div><strong>Patient:</strong> {appt.patientName} ({appt.patientNumber})</div>
+                        <div><strong>Dentist:</strong> {appt.dentistName}</div>
+                        <div><strong>Treatment:</strong> {appt.treatmentName} (${Number(appt.treatmentCost).toFixed(2)})</div>
+                        <div><strong>Date/Time:</strong> {appt.appointmentDate} at {appt.appointmentTime}</div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              <div className="form-row-2">
+                <div className="form-group">
+                  <label className="form-label">Consultation Fee ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="form-input"
+                    value={consultationFee}
+                    onChange={(e) => setConsultationFee(Number(e.target.value))}
+                  />
+                </div>
 
                 <div className="form-group">
-                  <label>Select Appointment *</label>
-                  <select
-                    value={selectedAppointmentId}
-                    onChange={(e) => handleAppointmentChange(Number(e.target.value))}
-                    required
-                  >
-                    <option value="0">-- Choose an unbilled appointment --</option>
-                    {availableAppointments.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.appointmentNumber} — {a.patientName} ({a.treatmentName}, {a.appointmentDate})
-                      </option>
-                    ))}
-                  </select>
-                  {availableAppointments.length === 0 && (
-                    <small className="text-muted">No unbilled appointments found. Existing appointments already have bills.</small>
-                  )}
-                </div>
-
-                {selectedAppointmentId > 0 && (
-                  <div className="selected-appt-preview">
-                    {(() => {
-                      const appt = appointments.find((a) => a.id === selectedAppointmentId);
-                      if (!appt) return null;
-                      return (
-                        <div className="preview-card">
-                          <div><strong>Patient:</strong> {appt.patientName} ({appt.patientNumber})</div>
-                          <div><strong>Dentist:</strong> {appt.dentistName}</div>
-                          <div><strong>Treatment:</strong> {appt.treatmentName} (${Number(appt.treatmentCost).toFixed(2)})</div>
-                          <div><strong>Date/Time:</strong> {appt.appointmentDate} at {appt.appointmentTime}</div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label>Consultation Fee ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={consultationFee}
-                      onChange={(e) => setConsultationFee(Number(e.target.value))}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Treatment Amount ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={treatmentAmount}
-                      onChange={(e) => setTreatmentAmount(Number(e.target.value))}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label>Bill Date</label>
-                    <input
-                      type="date"
-                      value={billDate}
-                      onChange={(e) => setBillDate(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Initial Status</label>
-                    <select
-                      value={billStatus}
-                      onChange={(e) => setBillStatus(e.target.value as BillStatus)}
-                    >
-                      <option value="PENDING">PENDING</option>
-                      <option value="PAID">PAID</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Live Total Calculation */}
-                <div className="live-total-box">
-                  <span>Grand Total:</span>
-                  <span className="live-total-value">
-                    ${(Number(consultationFee || 0) + Number(treatmentAmount || 0)).toFixed(2)}
-                  </span>
+                  <label className="form-label">Treatment Amount ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="form-input"
+                    value={treatmentAmount}
+                    onChange={(e) => setTreatmentAmount(Number(e.target.value))}
+                  />
                 </div>
               </div>
 
-              <div className="modal-footer">
+              <div className="form-row-2">
+                <div className="form-group">
+                  <label className="form-label">Bill Date</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={billDate}
+                    onChange={(e) => setBillDate(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Initial Status</label>
+                  <select
+                    className="form-input"
+                    value={billStatus}
+                    onChange={(e) => setBillStatus(e.target.value as BillStatus)}
+                  >
+                    <option value="PENDING">PENDING</option>
+                    <option value="PAID">PAID</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Live Total Calculation */}
+              <div className="live-total-box" style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '0.85rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                <span style={{ fontWeight: 600, color: '#0369a1' }}>Grand Total:</span>
+                <span className="live-total-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0284c7' }}>
+                  ${(Number(consultationFee || 0) + Number(treatmentAmount || 0)).toFixed(2)}
+                </span>
+              </div>
+
+              <div className="modal-actions" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                 <button
                   type="button"
                   className="btn-secondary"
@@ -505,46 +600,45 @@ export const BillingPage: React.FC = () => {
 
       {/* UPDATE STATUS MODAL */}
       {updatingBill && (
-        <div className="modal-backdrop" onClick={() => setUpdatingBill(null)}>
-          <div className="modal-content modal-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content auth-card modal-card" style={{ maxWidth: '460px' }}>
             <div className="modal-header">
-              <h2>Update Payment Status</h2>
-              <button className="modal-close" onClick={() => setUpdatingBill(null)}>
-                &times;
+              <h2 className="auth-title" style={{ fontSize: '1.2rem', margin: 0 }}>Update Payment Status</h2>
+              <button className="modal-close" onClick={() => setUpdatingBill(null)}>&times;</button>
+            </div>
+            
+            <p style={{ fontSize: '0.9rem', color: '#475569', margin: '1rem 0' }}>
+              Update payment status for invoice <strong>#{updatingBill.billNumber}</strong> ({updatingBill.patientName}):
+            </p>
+            
+            <div className="status-button-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <button
+                className="btn-status-option paid"
+                onClick={() => handleQuickStatusUpdate(updatingBill, 'PAID')}
+              >
+                Mark PAID
+              </button>
+              <button
+                className="btn-status-option pending"
+                onClick={() => handleQuickStatusUpdate(updatingBill, 'PENDING')}
+              >
+                Mark PENDING
+              </button>
+              <button
+                className="btn-status-option cancelled"
+                onClick={() => handleQuickStatusUpdate(updatingBill, 'CANCELLED')}
+              >
+                Mark CANCELLED
+              </button>
+              <button
+                className="btn-status-option refunded"
+                onClick={() => handleQuickStatusUpdate(updatingBill, 'REFUNDED')}
+              >
+                Mark REFUNDED
               </button>
             </div>
-            <div className="modal-body">
-              <p>
-                Update payment status for bill <strong>{updatingBill.billNumber}</strong> ({updatingBill.patientName}):
-              </p>
-              <div className="status-button-grid mt-4">
-                <button
-                  className="btn-status-option paid"
-                  onClick={() => handleQuickStatusUpdate(updatingBill, 'PAID')}
-                >
-                  Mark PAID
-                </button>
-                <button
-                  className="btn-status-option pending"
-                  onClick={() => handleQuickStatusUpdate(updatingBill, 'PENDING')}
-                >
-                  Mark PENDING
-                </button>
-                <button
-                  className="btn-status-option cancelled"
-                  onClick={() => handleQuickStatusUpdate(updatingBill, 'CANCELLED')}
-                >
-                  Mark CANCELLED
-                </button>
-                <button
-                  className="btn-status-option refunded"
-                  onClick={() => handleQuickStatusUpdate(updatingBill, 'REFUNDED')}
-                >
-                  Mark REFUNDED
-                </button>
-              </div>
-            </div>
-            <div className="modal-footer">
+            
+            <div className="modal-actions" style={{ justifyContent: 'flex-end' }}>
               <button className="btn-secondary" onClick={() => setUpdatingBill(null)}>
                 Cancel
               </button>
@@ -555,17 +649,19 @@ export const BillingPage: React.FC = () => {
 
       {/* RECEIPT MODAL */}
       {viewingReceipt && (
-        <div className="modal-backdrop" onClick={() => setViewingReceipt(null)}>
-          <div className="modal-content receipt-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header no-print">
-              <h2>Official Dental Receipt</h2>
-              <div className="modal-header-actions">
+        <div className="modal-overlay">
+          <div className="modal-content receipt-modal-card modal-card" style={{ maxWidth: '680px' }}>
+            <div className="modal-header no-print" style={{ marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Receipt size={20} style={{ color: '#0284c7' }} />
+                <h2 className="auth-title" style={{ fontSize: '1.2rem', margin: 0 }}>Official Dental Receipt</h2>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <button className="btn-primary btn-sm" onClick={() => window.print()}>
-                  Print / Save Receipt
+                  <Printer size={14} />
+                  <span>Print Receipt</span>
                 </button>
-                <button className="modal-close" onClick={() => setViewingReceipt(null)}>
-                  &times;
-                </button>
+                <button className="modal-close" onClick={() => setViewingReceipt(null)}>&times;</button>
               </div>
             </div>
 
@@ -652,7 +748,7 @@ export const BillingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="modal-footer no-print">
+            <div className="modal-actions no-print" style={{ justifyContent: 'flex-end', marginTop: '1rem' }}>
               <button className="btn-secondary" onClick={() => setViewingReceipt(null)}>
                 Close
               </button>
@@ -663,29 +759,38 @@ export const BillingPage: React.FC = () => {
 
       {/* DELETE CONFIRMATION MODAL */}
       {deletingBill && (
-        <div className="modal-backdrop" onClick={() => setDeletingBill(null)}>
-          <div className="modal-content modal-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content auth-card modal-card" style={{ maxWidth: '460px' }}>
             <div className="modal-header">
-              <h2>Confirm Deletion</h2>
-              <button className="modal-close" onClick={() => setDeletingBill(null)}>
-                &times;
-              </button>
+              <h2 className="auth-title" style={{ color: '#ef4444', fontSize: '1.2rem', margin: 0 }}>Confirm Deletion</h2>
+              <button className="modal-close" onClick={() => setDeletingBill(null)}>&times;</button>
             </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to delete bill <strong>{deletingBill.billNumber}</strong> for patient{' '}
-                <strong>{deletingBill.patientName}</strong>?
-              </p>
-              <div className="banner-warning mt-2">
-                Note: Only unpaid/cancelled bills can be deleted. Completed payments are protected for audit compliance.
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setDeletingBill(null)}>
+            
+            <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', margin: '1rem 0' }}>
+              Are you sure you want to delete invoice <strong>#{deletingBill.billNumber}</strong> for patient{' '}
+              <strong>{deletingBill.patientName}</strong>?
+            </p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+              Audit Rule: Only unpaid/cancelled bills can be deleted. Completed payments are protected for compliance.
+            </p>
+
+            <div className="modal-actions" style={{ justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setDeletingBill(null)}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button className="btn-danger" onClick={handleDeleteConfirm}>
-                Confirm Delete
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={handleDeleteConfirm}
+                disabled={submitting}
+                id="btn-confirm-delete-bill"
+              >
+                {submitting ? 'Deleting...' : 'Delete Invoice'}
               </button>
             </div>
           </div>

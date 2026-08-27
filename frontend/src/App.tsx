@@ -225,12 +225,12 @@ export const App: React.FC = () => {
               </div>
 
               <div className="card">
-                <h3 className="card-title">Scope Discipline</h3>
+                <h3 className="card-title">Production Readiness</h3>
                 <p className="card-content">
-                  Milestone 2 strictly implements user authentication and session management. Business domains remain deferred to future milestones.
+                  Fully integrated clinic platform covering Patients, Appointments, Dentist Availability, Billing, Receipts, and Reports.
                 </p>
                 <ul className="tech-list">
-                  <li className="tech-tag">No Mock Tokens</li>
+                  <li className="tech-tag">Stateless JWT</li>
                   <li className="tech-tag">Safe DTOs</li>
                   <li className="tech-tag">Zero Leaked Hashes</li>
                 </ul>
@@ -241,7 +241,7 @@ export const App: React.FC = () => {
       </main>
 
       <footer className="app-footer">
-        Dental Appointment and Patient Management System &bull; Milestone 2 Authentication &amp; User Management
+        Dental Appointment and Patient Management System &bull; Enterprise Clinic Management Platform
       </footer>
     </div>
   );

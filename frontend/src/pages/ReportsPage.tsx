@@ -5,6 +5,10 @@ import {
   TreatmentRevenueResponse,
 } from '../types';
 import { billingService } from '../services/billingService';
+import {
+  TrendingUp,
+  RotateCcw,
+} from 'lucide-react';
 
 export const ReportsPage: React.FC = () => {
   const [revenueReport, setRevenueReport] = useState<RevenueReportResponse | null>(null);
@@ -49,54 +53,62 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="reports-page-container">
       {/* Header */}
-      <div className="page-header-row">
+      <div className="page-header">
         <div>
-          <h1 className="page-title">Clinic Financial & Operational Reports</h1>
-          <p className="page-subtitle">Overview of revenue, collections, procedure volume, and billing health.</p>
+          <h1 className="page-title">Financial &amp; Operational Reports</h1>
+          <p className="page-subtitle">Overview of clinic revenue, payment status distribution, and procedure performance</p>
         </div>
       </div>
 
-      {error && <div className="banner-error">{error}</div>}
+      {error && <div className="banner-error mb-4">{error}</div>}
 
       {/* Date Range Selector */}
-      <div className="filter-card mb-6">
-        <div className="filter-grid">
-          <div className="filter-group">
-            <label>From Date</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-            />
-          </div>
+      <div className="filter-bar-card" style={{ marginBottom: '1.5rem' }}>
+        <div className="filter-item">
+          <label className="filter-label">From Date</label>
+          <input
+            type="date"
+            className="form-input filter-select"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </div>
 
-          <div className="filter-group">
-            <label>To Date</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-            />
-          </div>
+        <div className="filter-item">
+          <label className="filter-label">To Date</label>
+          <input
+            type="date"
+            className="form-input filter-select"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+        </div>
 
-          <div className="filter-group filter-actions-group">
-            <label>&nbsp;</label>
-            <button className="btn-secondary" onClick={handleResetFilters}>
-              All Time
-            </button>
-          </div>
+        <div className="filter-actions">
+          <button className="btn-secondary btn-sm" onClick={handleResetFilters}>
+            <RotateCcw size={14} />
+            <span>All Time</span>
+          </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="table-loading">Compiling clinic reports...</div>
+        <div className="table-loading">
+          <div className="spinner"></div>
+          <span>Compiling clinic analytics...</span>
+        </div>
       ) : (
         <>
           {/* Revenue KPI Cards */}
           {revenueReport && (
-            <div className="reports-kpi-grid mb-8">
-              <div className="kpi-card kpi-emerald">
-                <span className="kpi-label">Total Revenue Collected</span>
+            <div className="dashboard-kpi-grid" style={{ marginBottom: '2rem' }}>
+              <div className="kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-label">Total Revenue Collected</span>
+                  <div className="kpi-icon-box icon-emerald">
+                    <TrendingUp size={20} />
+                  </div>
+                </div>
                 <span className="kpi-value">${Number(revenueReport.totalRevenue).toFixed(2)}</span>
                 <span className="kpi-subtext">{revenueReport.paidBills} Invoices Paid</span>
               </div>

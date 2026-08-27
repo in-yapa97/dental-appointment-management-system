@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { authService } from '../services/authService';
 import { User } from '../types';
+import { LogIn, User as UserIcon, Lock, AlertCircle, Activity } from 'lucide-react';
 
 interface LoginPageProps {
   onLoginSuccess: (user: User) => void;
@@ -43,13 +44,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   return (
     <div className="auth-card">
       <div className="auth-header">
+        <div className="brand-logo" style={{ margin: '0 auto 1rem auto', width: '48px', height: '48px' }}>
+          <Activity size={24} />
+        </div>
         <h2 className="auth-title">Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to your Dental Appointment Management account</p>
+        <p className="auth-subtitle">Sign in to your DentalCare Management account</p>
       </div>
 
       {error && (
-        <div className="alert-box alert-error" id="login-error-alert">
-          <span className="alert-icon">&#9888;</span>
+        <div className="alert-box alert-error" id="login-error-alert" style={{ marginBottom: '1.25rem' }}>
+          <AlertCircle size={18} className="alert-icon" />
           <span>{error}</span>
         </div>
       )}
@@ -57,29 +61,37 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       <form onSubmit={handleSubmit} className="auth-form" noValidate>
         <div className="form-group">
           <label htmlFor="login-username" className="form-label">Username</label>
-          <input
-            id="login-username"
-            type="text"
-            className="form-input"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={loading}
-            autoFocus
-          />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <UserIcon size={18} style={{ position: 'absolute', left: '0.9rem', color: '#94a3b8' }} />
+            <input
+              id="login-username"
+              type="text"
+              className="form-input"
+              style={{ paddingLeft: '2.5rem' }}
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={loading}
+              autoFocus
+            />
+          </div>
         </div>
 
         <div className="form-group">
           <label htmlFor="login-password" className="form-label">Password</label>
-          <input
-            id="login-password"
-            type="password"
-            className="form-input"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-          />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Lock size={18} style={{ position: 'absolute', left: '0.9rem', color: '#94a3b8' }} />
+            <input
+              id="login-password"
+              type="password"
+              className="form-input"
+              style={{ paddingLeft: '2.5rem' }}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+            />
+          </div>
         </div>
 
         <button
@@ -87,8 +99,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           className="submit-btn"
           disabled={loading}
           id="btn-login-submit"
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
         >
-          {loading ? 'Authenticating...' : 'Sign In'}
+          <LogIn size={18} />
+          <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
         </button>
       </form>
 
@@ -106,3 +120,4 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     </div>
   );
 };
+

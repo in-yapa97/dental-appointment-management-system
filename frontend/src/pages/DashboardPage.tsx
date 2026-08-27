@@ -3,6 +3,18 @@ import { Appointment, Bill, Patient, User } from '../types';
 import { patientService } from '../services/patientService';
 import { appointmentService } from '../services/appointmentService';
 import { billingService } from '../services/billingService';
+import {
+  Users,
+  Calendar,
+  DollarSign,
+  Clock,
+  ArrowRight,
+  BarChart3,
+  CalendarCheck,
+  UserPlus,
+  Receipt,
+  Sparkles,
+} from 'lucide-react';
 
 interface DashboardPageProps {
   currentUser: User;
@@ -65,6 +77,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
       {/* Welcome Banner */}
       <div className="dashboard-hero">
         <div className="hero-text">
+          <div className="hero-badge">
+            <Sparkles size={14} className="hero-badge-icon" />
+            <span>Clinic Executive Portal</span>
+          </div>
           <h1 className="hero-title">Welcome back, {currentUser.fullName}</h1>
           <p className="hero-subtitle">
             DentalCare Management Dashboard &bull; {todayFormatted}
@@ -72,10 +88,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
         </div>
         <div className="hero-actions">
           <button className="btn-primary" onClick={() => onNavigate('appointments')}>
-            + Book Appointment
+            <CalendarCheck size={16} />
+            <span>Book Appointment</span>
           </button>
           <button className="btn-secondary" onClick={() => onNavigate('patients')}>
-            + Add Patient
+            <UserPlus size={16} />
+            <span>Add Patient</span>
           </button>
         </div>
       </div>
@@ -83,33 +101,68 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
       {error && <div className="banner-error mb-4">{error}</div>}
 
       {loading ? (
-        <div className="table-loading">Loading clinic metrics...</div>
+        <div className="table-loading">
+          <div className="spinner"></div>
+          <span>Loading clinic metrics...</span>
+        </div>
       ) : (
         <>
           {/* Quick Metrics KPI Cards */}
           <div className="dashboard-kpi-grid">
             <div className="kpi-card kpi-indigo cursor-pointer" onClick={() => onNavigate('patients')}>
-              <span className="kpi-label">Registered Patients</span>
+              <div className="kpi-top">
+                <span className="kpi-label">Registered Patients</span>
+                <div className="kpi-icon-box icon-indigo">
+                  <Users size={20} />
+                </div>
+              </div>
               <span className="kpi-value">{totalPatients}</span>
-              <span className="kpi-subtext text-primary">View all patients &rarr;</span>
+              <div className="kpi-footer">
+                <span className="kpi-subtext text-primary">View patient records</span>
+                <ArrowRight size={14} className="kpi-arrow" />
+              </div>
             </div>
 
             <div className="kpi-card kpi-emerald cursor-pointer" onClick={() => onNavigate('appointments')}>
-              <span className="kpi-label">Active Appointments</span>
+              <div className="kpi-top">
+                <span className="kpi-label">Active Appointments</span>
+                <div className="kpi-icon-box icon-emerald">
+                  <Calendar size={20} />
+                </div>
+              </div>
               <span className="kpi-value">{scheduledAppts}</span>
-              <span className="kpi-subtext">{totalAppointments} Total booked &rarr;</span>
+              <div className="kpi-footer">
+                <span className="kpi-subtext">{totalAppointments} total booked</span>
+                <ArrowRight size={14} className="kpi-arrow" />
+              </div>
             </div>
 
             <div className="kpi-card kpi-paid cursor-pointer" onClick={() => onNavigate('billing')}>
-              <span className="kpi-label">Revenue Collected</span>
+              <div className="kpi-top">
+                <span className="kpi-label">Revenue Collected</span>
+                <div className="kpi-icon-box icon-sky">
+                  <DollarSign size={20} />
+                </div>
+              </div>
               <span className="kpi-value">${totalRevenue.toFixed(2)}</span>
-              <span className="kpi-subtext">{bills.length} Invoices issued &rarr;</span>
+              <div className="kpi-footer">
+                <span className="kpi-subtext">{bills.length} invoices issued</span>
+                <ArrowRight size={14} className="kpi-arrow" />
+              </div>
             </div>
 
             <div className="kpi-card kpi-amber cursor-pointer" onClick={() => onNavigate('billing')}>
-              <span className="kpi-label">Pending Invoices</span>
+              <div className="kpi-top">
+                <span className="kpi-label">Pending Invoices</span>
+                <div className="kpi-icon-box icon-amber">
+                  <Clock size={20} />
+                </div>
+              </div>
               <span className="kpi-value">{pendingBills}</span>
-              <span className="kpi-subtext">Awaiting payment &rarr;</span>
+              <div className="kpi-footer">
+                <span className="kpi-subtext">Awaiting payment</span>
+                <ArrowRight size={14} className="kpi-arrow" />
+              </div>
             </div>
           </div>
 
@@ -118,16 +171,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
             <h3 className="section-title">Quick Actions</h3>
             <div className="action-chips">
               <button className="action-chip" onClick={() => onNavigate('patients')}>
-                <span className="chip-icon">&#128100;</span> Patient Directory
+                <Users size={16} className="chip-icon" />
+                <span>Patient Directory</span>
               </button>
               <button className="action-chip" onClick={() => onNavigate('appointments')}>
-                <span className="chip-icon">&#128197;</span> Appointment Calendar
+                <Calendar size={16} className="chip-icon" />
+                <span>Appointment Calendar</span>
               </button>
               <button className="action-chip" onClick={() => onNavigate('billing')}>
-                <span className="chip-icon">&#128179;</span> Invoices &amp; Receipts
+                <Receipt size={16} className="chip-icon" />
+                <span>Invoices &amp; Receipts</span>
               </button>
               <button className="action-chip" onClick={() => onNavigate('reports')}>
-                <span className="chip-icon">&#128200;</span> Financial Reports
+                <BarChart3 size={16} className="chip-icon" />
+                <span>Financial Reports</span>
               </button>
             </div>
           </div>
@@ -242,3 +299,4 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
     </div>
   );
 };
+

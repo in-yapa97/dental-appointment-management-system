@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Gender, Patient, PatientRequest } from '../types';
 import { patientService } from '../services/patientService';
+import {
+  Search,
+  X,
+  UserPlus,
+  Eye,
+  Edit3,
+  Trash2,
+  CheckCircle2,
+  AlertCircle,
+  Users,
+} from 'lucide-react';
 
 export const PatientsPage: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -163,22 +174,23 @@ export const PatientsPage: React.FC = () => {
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Patient Management</h1>
-          <p className="page-subtitle">Directory, record creation, and profile lookup</p>
+          <h1 className="page-title">Patient Directory</h1>
+          <p className="page-subtitle">Manage patient profiles, medical histories, and contact info</p>
         </div>
         <button
-          className="submit-btn add-patient-btn"
+          className="btn-primary"
           onClick={openCreateModal}
           id="btn-add-patient"
         >
-          + Register Patient
+          <UserPlus size={16} />
+          <span>Register Patient</span>
         </button>
       </div>
 
       {/* Notifications */}
       {notice && (
         <div className="alert-box alert-success banner-notice">
-          <span className="alert-icon">&#10003;</span>
+          <CheckCircle2 size={18} className="alert-icon" />
           <span>{notice}</span>
           <button className="close-notice-btn" onClick={() => setNotice(null)}>&times;</button>
         </div>
@@ -186,17 +198,19 @@ export const PatientsPage: React.FC = () => {
 
       {error && (
         <div className="alert-box alert-error banner-notice">
-          <span className="alert-icon">&#9888;</span>
+          <AlertCircle size={18} className="alert-icon" />
           <span>{error}</span>
           <button className="close-notice-btn" onClick={() => setError(null)}>&times;</button>
         </div>
       )}
 
       {/* Search Bar */}
-      <div className="search-bar-wrapper">
+      <div className="search-bar-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <Search size={18} style={{ position: 'absolute', left: '1rem', color: '#94a3b8', pointerEvents: 'none' }} />
         <input
           type="text"
           className="form-input search-input"
+          style={{ paddingLeft: '2.75rem', paddingRight: '2.5rem' }}
           placeholder="Search by patient #, name, phone, or email..."
           value={searchKeyword}
           onChange={handleSearchChange}
@@ -204,7 +218,7 @@ export const PatientsPage: React.FC = () => {
         />
         {searchKeyword && (
           <button className="clear-search-btn" onClick={handleClearSearch} title="Clear search">
-            &times;
+            <X size={16} />
           </button>
         )}
       </div>
@@ -212,13 +226,13 @@ export const PatientsPage: React.FC = () => {
       {/* Patient Table / Content */}
       <div className="table-wrapper">
         {loading ? (
-          <div className="loading-state">
-            <span className="pulse-dot"></span>
+          <div className="table-loading">
+            <div className="spinner"></div>
             <span>Loading patient directory...</span>
           </div>
         ) : patients.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">&#128100;</div>
+            <Users size={42} style={{ color: '#94a3b8', marginBottom: '0.75rem' }} />
             <h3>No Patients Found</h3>
             <p>
               {searchKeyword
@@ -227,7 +241,7 @@ export const PatientsPage: React.FC = () => {
             </p>
           </div>
         ) : (
-          <table className="patients-table">
+          <table className="data-table patients-table">
             <thead>
               <tr>
                 <th>Patient #</th>
@@ -268,22 +282,22 @@ export const PatientsPage: React.FC = () => {
                     <span className="patient-address-cell">{p.address || '—'}</span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <div className="table-actions">
+                    <div className="table-actions" style={{ justifyContent: 'flex-end', gap: '0.35rem' }}>
                       <button
                         className="action-btn action-view"
                         onClick={() => setViewingPatient(p)}
-                        title="View Patient Details"
+                        title="View Details"
                         id={`btn-view-${p.id}`}
                       >
-                        View
+                        <Eye size={14} />
                       </button>
                       <button
                         className="action-btn action-edit"
                         onClick={() => openEditModal(p)}
-                        title="Edit Patient Details"
+                        title="Edit Details"
                         id={`btn-edit-${p.id}`}
                       >
-                        Edit
+                        <Edit3 size={14} />
                       </button>
                       <button
                         className="action-btn action-delete"
@@ -291,7 +305,7 @@ export const PatientsPage: React.FC = () => {
                         title="Delete Patient"
                         id={`btn-delete-${p.id}`}
                       >
-                        Delete
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -315,7 +329,7 @@ export const PatientsPage: React.FC = () => {
 
             {formError && (
               <div className="alert-box alert-error" style={{ marginBottom: '1rem' }}>
-                <span className="alert-icon">&#9888;</span>
+                <AlertCircle size={16} />
                 <span>{formError}</span>
               </div>
             )}
@@ -414,7 +428,7 @@ export const PatientsPage: React.FC = () => {
               <div className="modal-actions">
                 <button
                   type="button"
-                  className="nav-btn"
+                  className="btn-secondary"
                   onClick={() => setShowFormModal(false)}
                   disabled={submitting}
                 >
@@ -422,10 +436,9 @@ export const PatientsPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="submit-btn"
+                  className="btn-primary"
                   disabled={submitting}
                   id="btn-save-patient"
-                  style={{ width: 'auto', padding: '0.65rem 1.5rem' }}
                 >
                   {submitting ? 'Saving...' : editingPatient ? 'Update Patient' : 'Create Patient'}
                 </button>
@@ -487,14 +500,15 @@ export const PatientsPage: React.FC = () => {
 
             <div className="profile-actions" style={{ justifyContent: 'flex-end' }}>
               <button
-                className="check-btn"
+                className="btn-primary"
                 onClick={() => {
                   const toEdit = viewingPatient;
                   setViewingPatient(null);
                   openEditModal(toEdit);
                 }}
               >
-                Edit Details
+                <Edit3 size={16} />
+                <span>Edit Details</span>
               </button>
             </div>
           </div>
@@ -506,7 +520,7 @@ export const PatientsPage: React.FC = () => {
         <div className="modal-overlay">
           <div className="modal-content auth-card modal-card" style={{ maxWidth: '480px' }}>
             <div className="modal-header">
-              <h2 className="auth-title" style={{ color: '#dc2626' }}>Confirm Deletion</h2>
+              <h2 className="auth-title" style={{ color: '#ef4444' }}>Confirm Deletion</h2>
               <button className="modal-close" onClick={() => setDeletingPatient(null)}>&times;</button>
             </div>
 
@@ -521,7 +535,7 @@ export const PatientsPage: React.FC = () => {
             <div className="modal-actions">
               <button
                 type="button"
-                className="nav-btn"
+                className="btn-secondary"
                 onClick={() => setDeletingPatient(null)}
                 disabled={submitting}
               >
@@ -529,8 +543,7 @@ export const PatientsPage: React.FC = () => {
               </button>
               <button
                 type="button"
-                className="logout-btn"
-                style={{ backgroundColor: '#dc2626', color: 'white', borderColor: '#dc2626' }}
+                className="btn-danger"
                 onClick={handleDeleteConfirm}
                 disabled={submitting}
                 id="btn-confirm-delete"
@@ -544,3 +557,4 @@ export const PatientsPage: React.FC = () => {
     </div>
   );
 };
+
