@@ -1,4 +1,5 @@
 import { AuthResponse, LoginRequest, RegisterRequest, User, ApiErrorResponse } from '../types';
+import { API_BASE_URL } from './apiConfig';
 
 const TOKEN_KEY = 'dental_mgmt_auth_token';
 const USER_KEY = 'dental_mgmt_auth_user';
@@ -23,7 +24,7 @@ export const authService = {
   },
 
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch('/api/v1/auth/login', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ export const authService = {
   },
 
   async register(data: RegisterRequest): Promise<User> {
-    const response = await fetch('/api/v1/auth/register', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,7 +70,7 @@ export const authService = {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch('/api/v1/auth/me', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -93,7 +94,7 @@ export const authService = {
     try {
       const token = this.getToken();
       if (token) {
-        await fetch('/api/v1/auth/logout', {
+        await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,

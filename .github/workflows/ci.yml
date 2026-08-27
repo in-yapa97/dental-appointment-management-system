@@ -1,0 +1,67 @@
+name: Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  backend-ci:
+    name: Backend Build & Test (Spring Boot)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 LTS
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Run Backend Unit & Integration Tests (159 Tests)
+        run: |
+          cd backend
+          chmod +x mvnw
+          ./mvnw test
+
+      - name: Build Backend Executable JAR
+        run: |
+          cd backend
+          ./mvnw clean package -DskipTests
+
+      - name: Verify Backend Artifact
+        run: |
+          ls -la backend/target/*.jar
+
+  frontend-ci:
+    name: Frontend Build & Type Check (React + Vite + TS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package.json'
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run Frontend Build & Type Check (0 TS Errors)
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Verify Frontend Distribution Bundle
+        run: |
+          ls -la frontend/dist/index.html

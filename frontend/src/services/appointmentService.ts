@@ -8,6 +8,7 @@ import {
   TreatmentLookup,
 } from '../types';
 import { authService } from './authService';
+import { API_BASE_URL } from './apiConfig';
 
 const getAuthHeaders = (): HeadersInit => {
   const token = authService.getToken();
@@ -33,7 +34,7 @@ export const appointmentService = {
     if (filters.status) params.append('status', filters.status);
 
     const queryString = params.toString();
-    const url = queryString ? `/api/v1/appointments?${queryString}` : '/api/v1/appointments';
+    const url = queryString ? `${API_BASE_URL}/api/v1/appointments?${queryString}` : `${API_BASE_URL}/api/v1/appointments`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -49,7 +50,7 @@ export const appointmentService = {
   },
 
   async getAppointment(id: number): Promise<Appointment> {
-    const response = await fetch(`/api/v1/appointments/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/appointments/${id}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -63,7 +64,7 @@ export const appointmentService = {
   },
 
   async createAppointment(data: AppointmentRequest): Promise<Appointment> {
-    const response = await fetch('/api/v1/appointments', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/appointments`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -82,7 +83,7 @@ export const appointmentService = {
   },
 
   async updateAppointment(id: number, data: AppointmentRequest): Promise<Appointment> {
-    const response = await fetch(`/api/v1/appointments/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/appointments/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -101,7 +102,7 @@ export const appointmentService = {
   },
 
   async deleteAppointment(id: number): Promise<void> {
-    const response = await fetch(`/api/v1/appointments/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/appointments/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
@@ -114,7 +115,7 @@ export const appointmentService = {
 
   async checkAvailability(dentistId: number, date: string, time: string): Promise<AvailabilityResponse> {
     const formattedTime = time.length === 5 ? `${time}:00` : time;
-    const url = `/api/v1/appointments/availability?dentistId=${dentistId}&date=${date}&time=${encodeURIComponent(formattedTime)}`;
+    const url = `${API_BASE_URL}/api/v1/appointments/availability?dentistId=${dentistId}&date=${date}&time=${encodeURIComponent(formattedTime)}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -130,7 +131,7 @@ export const appointmentService = {
   },
 
   async getActiveDentists(): Promise<DentistLookup[]> {
-    const response = await fetch('/api/v1/appointments/dentists', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/appointments/dentists`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -143,7 +144,7 @@ export const appointmentService = {
   },
 
   async getActiveTreatments(): Promise<TreatmentLookup[]> {
-    const response = await fetch('/api/v1/appointments/treatments', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/appointments/treatments`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

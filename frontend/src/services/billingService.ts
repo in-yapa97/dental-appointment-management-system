@@ -10,6 +10,7 @@ import {
   TreatmentRevenueResponse,
 } from '../types';
 import { authService } from './authService';
+import { API_BASE_URL } from './apiConfig';
 
 const getAuthHeaders = (): HeadersInit => {
   const token = authService.getToken();
@@ -37,7 +38,7 @@ export const billingService = {
     if (filters.billNumber) params.append('billNumber', filters.billNumber);
 
     const queryString = params.toString();
-    const url = queryString ? `/api/v1/bills?${queryString}` : '/api/v1/bills';
+    const url = queryString ? `${API_BASE_URL}/api/v1/bills?${queryString}` : `${API_BASE_URL}/api/v1/bills`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -53,7 +54,7 @@ export const billingService = {
   },
 
   async getBillById(id: number): Promise<Bill> {
-    const response = await fetch(`/api/v1/bills/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/bills/${id}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -67,7 +68,7 @@ export const billingService = {
   },
 
   async getBillByAppointmentId(appointmentId: number): Promise<Bill> {
-    const response = await fetch(`/api/v1/bills/appointment/${appointmentId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/bills/appointment/${appointmentId}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -81,7 +82,7 @@ export const billingService = {
   },
 
   async createBill(data: BillRequest): Promise<Bill> {
-    const response = await fetch('/api/v1/bills', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/bills`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -96,7 +97,7 @@ export const billingService = {
   },
 
   async updateBill(id: number, data: BillRequest): Promise<Bill> {
-    const response = await fetch(`/api/v1/bills/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/bills/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -111,7 +112,7 @@ export const billingService = {
   },
 
   async deleteBill(id: number): Promise<MessageResponse> {
-    const response = await fetch(`/api/v1/bills/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/bills/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
@@ -125,7 +126,7 @@ export const billingService = {
   },
 
   async getReceipt(id: number): Promise<ReceiptResponse> {
-    const response = await fetch(`/api/v1/bills/${id}/receipt`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/bills/${id}/receipt`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -144,7 +145,7 @@ export const billingService = {
     if (to) params.append('to', to);
 
     const queryString = params.toString();
-    const url = queryString ? `/api/v1/reports/revenue?${queryString}` : '/api/v1/reports/revenue';
+    const url = queryString ? `${API_BASE_URL}/api/v1/reports/revenue?${queryString}` : `${API_BASE_URL}/api/v1/reports/revenue`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -160,7 +161,7 @@ export const billingService = {
   },
 
   async getPaymentStatusReport(): Promise<PaymentStatusReportResponse> {
-    const response = await fetch('/api/v1/reports/payment-status', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/reports/payment-status`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -174,7 +175,7 @@ export const billingService = {
   },
 
   async getTreatmentRevenueReport(): Promise<TreatmentRevenueResponse[]> {
-    const response = await fetch('/api/v1/reports/treatment-revenue', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/reports/treatment-revenue`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

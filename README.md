@@ -362,9 +362,57 @@ dental-appointment-management-system/
 
 ---
 
+---
+
+## Deployment (Milestone 7)
+
+### Architecture Overview
+- **Frontend Host**: **Vercel** (Vite Single Page Application)
+- **Backend Host**: **Railway** (Spring Boot 3.3.4 executable container / JAR)
+- **Database**: Managed **PostgreSQL 17** relational database instance
+- **CI/CD Automation**: GitHub Actions (`.github/workflows/ci.yml` & `.github/workflows/deploy.yml`)
+
+### Frontend Deployment (Vercel)
+- **Platform**: Vercel
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Configuration File**: `frontend/vercel.json`
+- **Required Environment Variable**:
+  ```env
+  VITE_API_BASE_URL=https://<your-backend-service>.up.railway.app
+  ```
+
+### Backend Deployment (Railway)
+- **Platform**: Railway / Docker
+- **Java Runtime**: OpenJDK 17 LTS
+- **Build & Start**: `./mvnw clean package -DskipTests` -> `java -jar target/dental-management-backend-0.0.1-SNAPSHOT.jar`
+- **Required Environment Variables**:
+  ```env
+  SERVER_PORT=8080
+  DB_URL=jdbc:postgresql://<HOST>:<PORT>/<DB_NAME>
+  DB_USERNAME=<DB_USER>
+  DB_PASSWORD=<DB_PASSWORD>
+  JPA_DDL_AUTO=update
+  JWT_SECRET=<BASE64_ENCODED_256BIT_SECRET>
+  JWT_EXPIRATION_MS=86400000
+  CORS_ALLOWED_ORIGINS=https://<your-frontend-app>.vercel.app
+  ```
+
+### Database Deployment Readiness
+- **Database Engine**: PostgreSQL 17
+- **Schema Strategy**: `JPA_DDL_AUTO=update` safely manages relational schema updates without dropping existing audit data.
+- **Relational Integrity**: 1:1 bill-to-appointment constraint, foreign key integrity, and audit deletion protections enforced automatically.
+
+### CI/CD Workflow & Branching Strategy
+1. **Develop Branch**: Active integration branch. Pushing to `develop` triggers GitHub Actions CI (`ci.yml`) to execute backend unit/integration tests (159 tests) and verify frontend TypeScript compilation.
+2. **Main Branch**: Production branch. Pushes to `main` undergo full CI verification followed by CD workflow execution (`deploy.yml`).
+3. **Health Check**: Production deployment verified via `GET /api/v1/health` returning `{"status":"UP"}`.
+
+---
+
 ## Future Enhancements (Optional / Roadmap)
 
-The following items are optional future enhancements beyond the current M0–M6 scope:
+The following items are optional future enhancements beyond the current M0–M7 scope:
 - **End-to-End Browser Automation**: Adding Cypress or Playwright test suites into the CI/CD pipeline.
 - **Exporting Reports**: Adding one-click export to CSV and downloadable PDF for treatment profitability reports.
 - **SMS / Email Notifications**: Automated reminder dispatch for upcoming appointments.
@@ -373,4 +421,5 @@ The following items are optional future enhancements beyond the current M0–M6 
 
 ## Academic Assessment & License
 
-This project was developed as a university assessment project demonstrating full-stack enterprise web development, clean layered architecture, relational database modeling, stateless security, and modern UI engineering.
+This project was developed as a university assessment project demonstrating full-stack enterprise web development, clean layered architecture, relational database modeling, stateless security, modern UI engineering, and CI/CD automated deployment.
+

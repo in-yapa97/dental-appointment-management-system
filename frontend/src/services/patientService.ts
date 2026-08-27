@@ -1,5 +1,6 @@
 import { ApiErrorResponse, Patient, PatientRequest } from '../types';
 import { authService } from './authService';
+import { API_BASE_URL } from './apiConfig';
 
 const getAuthHeaders = (): HeadersInit => {
   const token = authService.getToken();
@@ -11,7 +12,7 @@ const getAuthHeaders = (): HeadersInit => {
 
 export const patientService = {
   async getPatients(): Promise<Patient[]> {
-    const response = await fetch('/api/v1/patients', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/patients`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -25,7 +26,7 @@ export const patientService = {
   },
 
   async getPatient(id: number): Promise<Patient> {
-    const response = await fetch(`/api/v1/patients/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/patients/${id}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -40,8 +41,8 @@ export const patientService = {
 
   async searchPatients(keyword: string): Promise<Patient[]> {
     const url = keyword.trim()
-      ? `/api/v1/patients/search?keyword=${encodeURIComponent(keyword.trim())}`
-      : '/api/v1/patients';
+      ? `${API_BASE_URL}/api/v1/patients/search?keyword=${encodeURIComponent(keyword.trim())}`
+      : `${API_BASE_URL}/api/v1/patients`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -57,7 +58,7 @@ export const patientService = {
   },
 
   async createPatient(data: PatientRequest): Promise<Patient> {
-    const response = await fetch('/api/v1/patients', {
+    const response = await fetch(`${API_BASE_URL}/api/v1/patients`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -76,7 +77,7 @@ export const patientService = {
   },
 
   async updatePatient(id: number, data: PatientRequest): Promise<Patient> {
-    const response = await fetch(`/api/v1/patients/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/patients/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -95,7 +96,7 @@ export const patientService = {
   },
 
   async deletePatient(id: number): Promise<void> {
-    const response = await fetch(`/api/v1/patients/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/patients/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
