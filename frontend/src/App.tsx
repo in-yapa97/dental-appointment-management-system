@@ -11,10 +11,11 @@ import { PatientsPage } from './pages/PatientsPage';
 import { AppointmentsPage } from './pages/AppointmentsPage';
 import { BillingPage } from './pages/BillingPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getStoredUser());
-  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports'>('login');
+  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard'>('login');
   const [notice, setNotice] = useState<string | null>(null);
 
   // System Health state (retained from Milestone 0)
@@ -27,7 +28,7 @@ export const App: React.FC = () => {
       authService.getCurrentUser()
         .then((user) => {
           setCurrentUser(user);
-          setActiveView('appointments');
+          setActiveView('dashboard');
         })
         .catch(() => {
           authService.logout();
@@ -41,7 +42,7 @@ export const App: React.FC = () => {
 
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
-    setActiveView('appointments');
+    setActiveView('dashboard');
     setNotice(`Welcome back, ${user.fullName}!`);
   };
 
@@ -76,7 +77,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         activeView={activeView}
         onNavigate={(view) => {
-          if (['profile', 'patients', 'appointments', 'billing', 'reports'].includes(view) && !currentUser) {
+          if (['dashboard', 'profile', 'patients', 'appointments', 'billing', 'reports'].includes(view) && !currentUser) {
             setActiveView('login');
           } else {
             setActiveView(view);
@@ -117,9 +118,12 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* VIEW 3: APPOINTMENT MANAGEMENT */}
-        {activeView === 'appointments' && currentUser && (
-          <AppointmentsPage />
+        {/* VIEW 3: CLINIC DASHBOARD */}
+        {activeView === 'dashboard' && currentUser && (
+          <DashboardPage
+            currentUser={currentUser}
+            onNavigate={setActiveView}
+          />
         )}
 
         {/* VIEW 4: PATIENT MANAGEMENT */}
@@ -127,17 +131,22 @@ export const App: React.FC = () => {
           <PatientsPage />
         )}
 
-        {/* VIEW 5: BILLING & INVOICING */}
+        {/* VIEW 5: APPOINTMENT MANAGEMENT */}
+        {activeView === 'appointments' && currentUser && (
+          <AppointmentsPage />
+        )}
+
+        {/* VIEW 6: BILLING & INVOICING */}
         {activeView === 'billing' && currentUser && (
           <BillingPage />
         )}
 
-        {/* VIEW 6: CLINIC REPORTS */}
+        {/* VIEW 7: CLINIC REPORTS */}
         {activeView === 'reports' && currentUser && (
           <ReportsPage />
         )}
 
-        {/* VIEW 7: AUTHENTICATED USER PROFILE */}
+        {/* VIEW 8: AUTHENTICATED USER PROFILE */}
         {activeView === 'profile' && currentUser && (
           <UserProfilePage
             user={currentUser}

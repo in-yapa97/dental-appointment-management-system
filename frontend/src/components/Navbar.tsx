@@ -3,8 +3,8 @@ import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports') => void;
+  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
   onLogout: () => void;
 }
 
@@ -16,28 +16,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   return (
     <nav className="navbar">
-      <div className="nav-brand" onClick={() => onNavigate(currentUser ? 'appointments' : 'login')}>
+      <div className="nav-brand" onClick={() => onNavigate(currentUser ? 'dashboard' : 'login')}>
         <div className="brand-logo">&#10010;</div>
         <span className="brand-title">DentalCare Management</span>
       </div>
 
       <div className="nav-actions">
-        <button
-          className={`nav-btn ${activeView === 'health' ? 'active' : ''}`}
-          onClick={() => onNavigate('health')}
-          id="nav-btn-health"
-        >
-          System Status
-        </button>
-
         {currentUser ? (
           <>
             <button
-              className={`nav-btn ${activeView === 'appointments' ? 'active' : ''}`}
-              onClick={() => onNavigate('appointments')}
-              id="nav-btn-appointments"
+              className={`nav-btn ${activeView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => onNavigate('dashboard')}
+              id="nav-btn-dashboard"
             >
-              Appointments
+              Dashboard
             </button>
             <button
               className={`nav-btn ${activeView === 'patients' ? 'active' : ''}`}
@@ -45,6 +37,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="nav-btn-patients"
             >
               Patients
+            </button>
+            <button
+              className={`nav-btn ${activeView === 'appointments' ? 'active' : ''}`}
+              onClick={() => onNavigate('appointments')}
+              id="nav-btn-appointments"
+            >
+              Appointments
             </button>
             <button
               className={`nav-btn ${activeView === 'billing' ? 'active' : ''}`}
@@ -66,6 +65,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="nav-btn-profile"
             >
               My Profile
+            </button>
+            <button
+              className={`nav-btn ${activeView === 'health' ? 'active' : ''}`}
+              onClick={() => onNavigate('health')}
+              id="nav-btn-health"
+            >
+              System Status
             </button>
             <div className="user-pill">
               <span className="user-avatar">{currentUser.fullName.charAt(0).toUpperCase()}</span>
