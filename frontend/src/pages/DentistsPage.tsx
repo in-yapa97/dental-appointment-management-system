@@ -11,9 +11,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Stethoscope,
-  Phone,
-  Mail,
-  Award,
   Sparkles,
 } from 'lucide-react';
 
@@ -178,63 +175,67 @@ export const DentistsPage: React.FC = () => {
     : dentists;
 
   return (
-    <div className="page-container">
+    <div className="patients-container">
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">
-            <Stethoscope className="title-icon text-primary" size={28} />
-            Dentists & Practitioners
-          </h1>
-          <p className="page-description">
-            Manage licensed dental practitioners, clinical specializations, contact details, and practicing status.
-          </p>
+          <h1 className="page-title">Dentist Directory</h1>
+          <p className="page-subtitle">Manage licensed dental specialists, specializations, contact details, and practicing status</p>
         </div>
-        <button className="btn-primary" onClick={openCreateModal} id="btn-add-dentist">
-          <UserPlus size={18} />
-          <span>Add Dentist</span>
+        <button
+          className="btn-primary"
+          onClick={openCreateModal}
+          id="btn-add-dentist"
+        >
+          <UserPlus size={16} />
+          <span>Register Dentist</span>
         </button>
       </div>
 
-      {/* Notices and Alerts */}
+      {/* Notifications */}
       {notice && (
-        <div className="alert-box alert-success">
-          <CheckCircle2 size={18} />
+        <div className="alert-box alert-success banner-notice">
+          <CheckCircle2 size={18} className="alert-icon" />
           <span>{notice}</span>
-          <button className="close-alert-btn" onClick={() => setNotice(null)}>&times;</button>
+          <button className="close-notice-btn" onClick={() => setNotice(null)}>&times;</button>
         </div>
       )}
 
       {error && (
-        <div className="alert-box alert-danger">
-          <AlertCircle size={18} />
+        <div className="alert-box alert-error banner-notice">
+          <AlertCircle size={18} className="alert-icon" />
           <span>{error}</span>
-          <button className="close-alert-btn" onClick={() => setError(null)}>&times;</button>
+          <button className="close-notice-btn" onClick={() => setError(null)}>&times;</button>
         </div>
       )}
 
-      {/* Search and Filters Bar */}
-      <div className="table-controls-card">
-        <div className="search-input-wrapper">
-          <Search size={18} className="search-icon" />
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search by name, dentist ID (DEN-...), specialization, phone, email..."
-            value={searchKeyword}
-            onChange={handleSearchChange}
-            id="input-search-dentists"
-          />
-          {searchKeyword && (
-            <button className="clear-search-btn" onClick={handleClearSearch} title="Clear search">
-              <X size={16} />
-            </button>
-          )}
+      {/* Search & Filter Bar */}
+      <div className="filter-bar-card">
+        <div className="filter-item" style={{ flex: '2 1 280px' }}>
+          <label className="filter-label">Search Practitioner</label>
+          <div className="search-bar-wrapper" style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: 0 }}>
+            <Search size={18} style={{ position: 'absolute', left: '1rem', color: '#94a3b8', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              className="form-input search-input"
+              style={{ paddingLeft: '2.75rem', paddingRight: '2.5rem' }}
+              placeholder="Search by dentist ID (DEN-...), name, specialization, phone, or email..."
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              id="input-search-dentists"
+            />
+            {searchKeyword && (
+              <button className="clear-search-btn" onClick={handleClearSearch} title="Clear search">
+                <X size={16} />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="filter-group">
+        <div className="filter-item" style={{ flex: '1 1 200px' }}>
+          <label className="filter-label">Specialization</label>
           <select
-            className="filter-select"
+            className="form-input filter-select"
             value={selectedSpecialization}
             onChange={(e) => setSelectedSpecialization(e.target.value)}
             id="select-filter-specialization"
@@ -247,109 +248,102 @@ export const DentistsPage: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {(searchKeyword || selectedSpecialization) && (
+          <div className="filter-item" style={{ flex: '0 0 auto', alignSelf: 'flex-end' }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                handleClearSearch();
+                setSelectedSpecialization('');
+              }}
+              style={{ padding: '0.65rem 1rem' }}
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Dentists Data Table */}
-      <div className="table-container">
+      <div className="table-wrapper">
         {loading ? (
-          <div className="table-loading-state">
+          <div className="table-loading">
             <div className="spinner"></div>
-            <p>Loading practitioner directory...</p>
+            <span>Loading practitioner directory...</span>
           </div>
         ) : filteredDentists.length === 0 ? (
           <div className="empty-state">
-            <Stethoscope size={48} className="empty-state-icon" />
+            <Stethoscope size={42} style={{ color: '#94a3b8', marginBottom: '0.75rem' }} />
             <h3>No Dentists Found</h3>
             <p>
               {searchKeyword || selectedSpecialization
                 ? 'No practitioners match your search criteria. Try clearing filters.'
-                : 'No dental practitioners registered yet. Click "Add Dentist" to register one.'}
+                : 'No dental practitioners registered yet. Click "+ Register Dentist" to add one.'}
             </p>
-            {(searchKeyword || selectedSpecialization) && (
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  handleClearSearch();
-                  setSelectedSpecialization('');
-                }}
-              >
-                Clear Filters
-              </button>
-            )}
           </div>
         ) : (
-          <table className="data-table" id="dentists-table">
+          <table className="data-table patients-table" id="dentists-table">
             <thead>
               <tr>
                 <th>Dentist ID</th>
                 <th>Practitioner Name</th>
                 <th>Specialization</th>
-                <th>Phone Number</th>
+                <th>Contact Phone</th>
                 <th>Email Address</th>
                 <th>Status</th>
-                <th className="text-right">Actions</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredDentists.map((dentist) => (
-                <tr key={dentist.id} className="table-row-hover">
+                <tr key={dentist.id}>
                   <td>
-                    <span className="badge badge-code">{dentist.dentistNumber}</span>
+                    <span className="patient-number-badge">{dentist.dentistNumber}</span>
                   </td>
                   <td>
-                    <div className="font-semibold text-main">{dentist.fullName}</div>
+                    <div className="cell-fullname font-semibold">{dentist.fullName}</div>
                   </td>
                   <td>
-                    <span className="badge badge-info">
-                      <Award size={12} className="inline mr-1" />
-                      {dentist.specialization}
+                    <span className="gender-tag gender-male">{dentist.specialization}</span>
+                  </td>
+                  <td>
+                    <div className="contact-phone">{dentist.phone}</div>
+                  </td>
+                  <td>
+                    <div className="contact-email">{dentist.email || '—'}</div>
+                  </td>
+                  <td>
+                    <span className={`status-pill ${dentist.active ? 'status-active' : 'status-inactive'}`}>
+                      <span className="dot"></span>
+                      {dentist.active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td>
-                    <div className="flex items-center text-muted">
-                      <Phone size={13} className="mr-1 text-muted" />
-                      {dentist.phone}
-                    </div>
-                  </td>
-                  <td>
-                    {dentist.email ? (
-                      <div className="flex items-center text-muted">
-                        <Mail size={13} className="mr-1 text-muted" />
-                        {dentist.email}
-                      </div>
-                    ) : (
-                      <span className="text-muted italic">None</span>
-                    )}
-                  </td>
-                  <td>
-                    {dentist.active ? (
-                      <span className="badge badge-success">Active</span>
-                    ) : (
-                      <span className="badge badge-secondary">Inactive</span>
-                    )}
-                  </td>
-                  <td className="text-right">
-                    <div className="action-buttons-group">
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions">
                       <button
                         className="action-btn action-view"
                         onClick={() => setViewingDentist(dentist)}
                         title="View Details"
                       >
-                        <Eye size={15} />
+                        <Eye size={14} style={{ display: 'inline', marginRight: '3px' }} />
+                        View
                       </button>
                       <button
                         className="action-btn action-edit"
                         onClick={() => openEditModal(dentist)}
                         title="Edit Practitioner"
                       >
-                        <Edit3 size={15} />
+                        <Edit3 size={14} style={{ display: 'inline', marginRight: '3px' }} />
+                        Edit
                       </button>
                       <button
                         className="action-btn action-delete"
                         onClick={() => setDeletingDentist(dentist)}
                         title="Delete Practitioner"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={14} style={{ display: 'inline', marginRight: '3px' }} />
+                        Delete
                       </button>
                     </div>
                   </td>
@@ -362,140 +356,118 @@ export const DentistsPage: React.FC = () => {
 
       {/* CREATE / EDIT MODAL */}
       {showFormModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
+        <div className="modal-overlay">
+          <div className="modal-content auth-card modal-card">
             <div className="modal-header">
-              <h3 className="modal-title">
-                {editingDentist ? (
-                  <>
-                    <Edit3 size={20} className="text-primary mr-2" />
-                    Edit Practitioner Details
-                  </>
-                ) : (
-                  <>
-                    <UserPlus size={20} className="text-primary mr-2" />
-                    Add New Dentist
-                  </>
-                )}
-              </h3>
-              <button className="modal-close-btn" onClick={() => setShowFormModal(false)}>&times;</button>
+              <h2 className="auth-title">
+                {editingDentist ? `Edit Practitioner #${editingDentist.dentistNumber}` : 'Register New Dentist'}
+              </h2>
+              <button className="modal-close" onClick={() => setShowFormModal(false)}>&times;</button>
             </div>
 
-            <form onSubmit={handleFormSubmit}>
-              <div className="modal-body">
-                {formError && (
-                  <div className="alert-box alert-danger mb-4">
-                    <AlertCircle size={16} />
-                    <span>{formError}</span>
-                  </div>
-                )}
+            {formError && (
+              <div className="alert-box alert-error" style={{ marginBottom: '1rem' }}>
+                <AlertCircle size={16} />
+                <span>{formError}</span>
+              </div>
+            )}
 
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Dentist ID <span className="text-danger">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="e.g. DEN-101"
-                        value={formData.dentistNumber}
-                        onChange={(e) => setFormData({ ...formData, dentistNumber: e.target.value })}
-                        required
-                        id="input-dentist-number"
-                      />
-                      {!editingDentist && (
-                        <button
-                          type="button"
-                          className="btn-secondary whitespace-nowrap text-xs"
-                          onClick={generateDentistNumber}
-                          title="Generate Unique Dentist ID"
-                        >
-                          <Sparkles size={14} className="mr-1" />
-                          Auto
-                        </button>
-                      )}
-                    </div>
-                    <span className="form-helper">Unique practitioner registration ID</span>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      Full Name <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Dr. Emily Thorne"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      required
-                      id="input-dentist-name"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      Specialization <span className="text-danger">*</span>
-                    </label>
-                    <select
-                      className="form-select"
-                      value={formData.specialization}
-                      onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                      required
-                      id="select-dentist-specialization"
+            <form onSubmit={handleFormSubmit} className="auth-form" noValidate>
+              <div className="form-group">
+                <label className="form-label">Dentist ID *</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g. DEN-101"
+                    value={formData.dentistNumber}
+                    onChange={(e) => setFormData({ ...formData, dentistNumber: e.target.value })}
+                    disabled={submitting}
+                    autoFocus
+                  />
+                  {!editingDentist && (
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={generateDentistNumber}
+                      title="Auto Generate ID"
+                      style={{ padding: '0 0.85rem', whiteSpace: 'nowrap', fontSize: '0.8rem' }}
                     >
-                      {SPECIALIZATIONS.map((spec) => (
-                        <option key={spec} value={spec}>
-                          {spec}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      Phone Number <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      className="form-input"
-                      placeholder="e.g. +1-555-0199"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      required
-                      id="input-dentist-phone"
-                    />
-                  </div>
-
-                  <div className="form-group full-width">
-                    <label className="form-label">Email Address</label>
-                    <input
-                      type="email"
-                      className="form-input"
-                      placeholder="e.g. emily.thorne@dentalcare.com"
-                      value={formData.email || ''}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      id="input-dentist-email"
-                    />
-                  </div>
-
-                  <div className="form-group full-width">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={formData.active}
-                        onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                        id="checkbox-dentist-active"
-                      />
-                      <span>Active Practicing Status (available for appointment bookings)</span>
-                    </label>
-                  </div>
+                      <Sparkles size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                      Auto
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="modal-footer">
+              <div className="form-group">
+                <label className="form-label">Practitioner Full Name *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g. Dr. Emily Thorne"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  disabled={submitting}
+                />
+              </div>
+
+              <div className="form-row-2">
+                <div className="form-group">
+                  <label className="form-label">Specialization *</label>
+                  <select
+                    className="form-input"
+                    value={formData.specialization}
+                    onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                    disabled={submitting}
+                  >
+                    {SPECIALIZATIONS.map((spec) => (
+                      <option key={spec} value={spec}>
+                        {spec}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Phone Number *</label>
+                  <input
+                    type="tel"
+                    className="form-input"
+                    placeholder="e.g. +1-555-0199"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email Address (Optional)</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="e.g. emily.thorne@dentalcare.com"
+                  value={formData.email || ''}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  disabled={submitting}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginTop: '0.25rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                    disabled={submitting}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <span>Active Practicing Status (Available for patient appointment bookings)</span>
+                </label>
+              </div>
+
+              <div className="modal-actions">
                 <button
                   type="button"
                   className="btn-secondary"
@@ -510,7 +482,7 @@ export const DentistsPage: React.FC = () => {
                   disabled={submitting}
                   id="btn-save-dentist"
                 >
-                  {submitting ? 'Saving...' : editingDentist ? 'Save Changes' : 'Register Dentist'}
+                  {submitting ? 'Saving...' : editingDentist ? 'Update Dentist' : 'Register Dentist'}
                 </button>
               </div>
             </form>
@@ -520,59 +492,46 @@ export const DentistsPage: React.FC = () => {
 
       {/* VIEW DETAILS MODAL */}
       {viewingDentist && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
+        <div className="modal-overlay">
+          <div className="modal-content auth-card modal-card">
             <div className="modal-header">
-              <h3 className="modal-title">
-                <Stethoscope size={20} className="text-primary mr-2" />
-                Practitioner Profile
-              </h3>
-              <button className="modal-close-btn" onClick={() => setViewingDentist(null)}>&times;</button>
+              <h2 className="auth-title">Practitioner Profile</h2>
+              <button className="modal-close" onClick={() => setViewingDentist(null)}>&times;</button>
             </div>
-            <div className="modal-body">
-              <div className="profile-card">
-                <div className="profile-header">
-                  <div className="profile-avatar bg-primary-light text-primary font-bold text-xl">
-                    {viewingDentist.fullName.replace('Dr. ', '').charAt(0)}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-main">{viewingDentist.fullName}</h4>
-                    <span className="badge badge-code">{viewingDentist.dentistNumber}</span>
-                  </div>
-                </div>
 
-                <div className="profile-grid mt-4">
-                  <div className="profile-item">
-                    <span className="profile-label">Specialization</span>
-                    <span className="profile-value font-medium text-primary">
-                      {viewingDentist.specialization}
-                    </span>
-                  </div>
-
-                  <div className="profile-item">
-                    <span className="profile-label">Practicing Status</span>
-                    <span className="profile-value">
-                      {viewingDentist.active ? (
-                        <span className="badge badge-success">Active Practitioner</span>
-                      ) : (
-                        <span className="badge badge-secondary">Inactive / On Leave</span>
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="profile-item">
-                    <span className="profile-label">Phone</span>
-                    <span className="profile-value">{viewingDentist.phone}</span>
-                  </div>
-
-                  <div className="profile-item">
-                    <span className="profile-label">Email Address</span>
-                    <span className="profile-value">{viewingDentist.email || 'Not provided'}</span>
-                  </div>
-                </div>
+            <div className="profile-details-grid" style={{ padding: '1rem 0' }}>
+              <div className="detail-item">
+                <span className="detail-label">Dentist ID</span>
+                <span className="detail-value">#{viewingDentist.dentistNumber}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Full Name</span>
+                <span className="detail-value">{viewingDentist.fullName}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Specialization</span>
+                <span className="detail-value" style={{ color: '#0284c7' }}>{viewingDentist.specialization}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Practicing Status</span>
+                <span className="detail-value">
+                  <span className={`status-pill ${viewingDentist.active ? 'status-active' : 'status-inactive'}`} style={{ display: 'inline-flex' }}>
+                    <span className="dot"></span>
+                    {viewingDentist.active ? 'Active' : 'Inactive'}
+                  </span>
+                </span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Phone</span>
+                <span className="detail-value">{viewingDentist.phone}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Email</span>
+                <span className="detail-value">{viewingDentist.email || 'Not provided'}</span>
               </div>
             </div>
-            <div className="modal-footer">
+
+            <div className="modal-actions">
               <button
                 className="btn-secondary"
                 onClick={() => setViewingDentist(null)}
@@ -587,7 +546,7 @@ export const DentistsPage: React.FC = () => {
                   openEditModal(d);
                 }}
               >
-                <Edit3 size={15} className="mr-1" />
+                <Edit3 size={14} style={{ display: 'inline', marginRight: '4px' }} />
                 Edit Profile
               </button>
             </div>
@@ -597,25 +556,23 @@ export const DentistsPage: React.FC = () => {
 
       {/* DELETE CONFIRMATION MODAL */}
       {deletingDentist && (
-        <div className="modal-backdrop">
-          <div className="modal-card modal-danger">
+        <div className="modal-overlay">
+          <div className="modal-content auth-card modal-card" style={{ borderTop: '4px solid #ef4444' }}>
             <div className="modal-header">
-              <h3 className="modal-title text-danger">
-                <AlertCircle size={20} className="mr-2" />
-                Delete Practitioner Record
-              </h3>
-              <button className="modal-close-btn" onClick={() => setDeletingDentist(null)}>&times;</button>
+              <h2 className="auth-title" style={{ color: '#ef4444' }}>Delete Practitioner</h2>
+              <button className="modal-close" onClick={() => setDeletingDentist(null)}>&times;</button>
             </div>
-            <div className="modal-body">
-              <p className="text-main mb-2">
-                Are you sure you want to delete practitioner record for{' '}
-                <strong>{deletingDentist.fullName}</strong> ({deletingDentist.dentistNumber})?
+
+            <div style={{ margin: '1rem 0', color: '#334155', lineHeight: 1.5 }}>
+              <p style={{ marginBottom: '0.75rem' }}>
+                Are you sure you want to delete practitioner record for <strong>{deletingDentist.fullName}</strong> ({deletingDentist.dentistNumber})?
               </p>
-              <p className="text-muted text-sm">
+              <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
                 Note: In accordance with relational database integrity constraints, dentists with existing scheduled appointments cannot be deleted.
               </p>
             </div>
-            <div className="modal-footer">
+
+            <div className="modal-actions">
               <button
                 className="btn-secondary"
                 onClick={() => setDeletingDentist(null)}
@@ -624,7 +581,8 @@ export const DentistsPage: React.FC = () => {
                 Cancel
               </button>
               <button
-                className="btn-danger"
+                className="btn-primary"
+                style={{ backgroundColor: '#ef4444', borderColor: '#ef4444' }}
                 onClick={handleDeleteConfirm}
                 disabled={submitting}
                 id="btn-confirm-delete-dentist"

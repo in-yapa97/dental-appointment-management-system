@@ -8,7 +8,6 @@ import {
   CreditCard,
   BarChart3,
   User as UserIcon,
-  ActivitySquare,
   LogOut,
   LogIn,
   UserPlus,
@@ -17,8 +16,8 @@ import {
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
+  activeView: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
   onLogout: () => void;
 }
 
@@ -98,14 +97,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <UserIcon size={16} />
               <span>My Profile</span>
-            </button>
-            <button
-              className={`nav-btn ${activeView === 'health' ? 'active' : ''}`}
-              onClick={() => onNavigate('health')}
-              id="nav-btn-health"
-            >
-              <ActivitySquare size={16} />
-              <span>System Status</span>
             </button>
 
             <div className="nav-divider"></div>
