@@ -15,11 +15,12 @@ import {
   Receipt,
   Sparkles,
   Stethoscope,
+  BookOpen,
 } from 'lucide-react';
 
 interface DashboardPageProps {
   currentUser: User;
-  onNavigate: (view: 'dashboard' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports') => void;
+  onNavigate: (view: 'dashboard' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'help') => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNavigate }) => {
@@ -95,6 +96,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
           <button className="btn-secondary" onClick={() => onNavigate('patients')}>
             <UserPlus size={16} />
             <span>Add Patient</span>
+          </button>
+          <button className="btn-secondary" onClick={() => onNavigate('help')} title="Open Staff Help Guide">
+            <BookOpen size={16} />
+            <span>Staff Guide</span>
           </button>
         </div>
       </div>

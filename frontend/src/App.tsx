@@ -12,10 +12,11 @@ import { AppointmentsPage } from './pages/AppointmentsPage';
 import { BillingPage } from './pages/BillingPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { HelpPage } from './pages/HelpPage';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getStoredUser());
-  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard'>('login');
+  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard' | 'help'>('login');
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         activeView={activeView}
         onNavigate={(view) => {
-          if (['dashboard', 'profile', 'patients', 'dentists', 'appointments', 'billing', 'reports'].includes(view) && !currentUser) {
+          if (['dashboard', 'profile', 'patients', 'dentists', 'appointments', 'billing', 'reports', 'help'].includes(view) && !currentUser) {
             setActiveView('login');
           } else {
             setActiveView(view);
@@ -133,7 +134,12 @@ export const App: React.FC = () => {
           <ReportsPage />
         )}
 
-        {/* VIEW 9: AUTHENTICATED USER PROFILE & SYSTEM STATUS */}
+        {/* VIEW 9: STAFF HELP & ONBOARDING GUIDE */}
+        {activeView === 'help' && currentUser && (
+          <HelpPage />
+        )}
+
+        {/* VIEW 10: AUTHENTICATED USER PROFILE & SYSTEM STATUS */}
         {activeView === 'profile' && currentUser && (
           <UserProfilePage
             user={currentUser}

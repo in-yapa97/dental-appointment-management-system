@@ -7,6 +7,7 @@ import {
   Calendar,
   CreditCard,
   BarChart3,
+  HelpCircle,
   LogOut,
   LogIn,
   UserPlus,
@@ -15,8 +16,8 @@ import {
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
+  activeView: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard' | 'help';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard' | 'help') => void;
   onLogout: () => void;
 }
 
@@ -88,6 +89,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <BarChart3 size={16} />
               <span>Reports</span>
+            </button>
+            <button
+              className={`nav-btn ${activeView === 'help' ? 'active' : ''}`}
+              onClick={() => onNavigate('help')}
+              id="nav-btn-help"
+            >
+              <HelpCircle size={16} />
+              <span>Help</span>
             </button>
             <div className="nav-divider"></div>
 
