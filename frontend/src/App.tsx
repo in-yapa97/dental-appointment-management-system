@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { PatientsPage } from './pages/PatientsPage';
+import { DentistsPage } from './pages/DentistsPage';
 import { AppointmentsPage } from './pages/AppointmentsPage';
 import { BillingPage } from './pages/BillingPage';
 import { ReportsPage } from './pages/ReportsPage';
@@ -15,7 +16,7 @@ import { DashboardPage } from './pages/DashboardPage';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getStoredUser());
-  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard'>('login');
+  const [activeView, setActiveView] = useState<'login' | 'register' | 'profile' | 'health' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard'>('login');
   const [notice, setNotice] = useState<string | null>(null);
 
   // System Health state (retained from Milestone 0)
@@ -77,7 +78,7 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         activeView={activeView}
         onNavigate={(view) => {
-          if (['dashboard', 'profile', 'patients', 'appointments', 'billing', 'reports'].includes(view) && !currentUser) {
+          if (['dashboard', 'profile', 'patients', 'dentists', 'appointments', 'billing', 'reports'].includes(view) && !currentUser) {
             setActiveView('login');
           } else {
             setActiveView(view);
@@ -129,6 +130,11 @@ export const App: React.FC = () => {
         {/* VIEW 4: PATIENT MANAGEMENT */}
         {activeView === 'patients' && currentUser && (
           <PatientsPage />
+        )}
+
+        {/* VIEW 4.5: DENTIST MANAGEMENT */}
+        {activeView === 'dentists' && currentUser && (
+          <DentistsPage />
         )}
 
         {/* VIEW 5: APPOINTMENT MANAGEMENT */}

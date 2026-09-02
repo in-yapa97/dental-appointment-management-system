@@ -12,12 +12,13 @@ import {
   LogOut,
   LogIn,
   UserPlus,
+  Stethoscope,
 } from 'lucide-react';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
+  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
   onLogout: () => void;
 }
 
@@ -57,6 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Users size={16} />
               <span>Patients</span>
+            </button>
+            <button
+              className={`nav-btn ${activeView === 'dentists' ? 'active' : ''}`}
+              onClick={() => onNavigate('dentists')}
+              id="nav-btn-dentists"
+            >
+              <Stethoscope size={16} />
+              <span>Dentists</span>
             </button>
             <button
               className={`nav-btn ${activeView === 'appointments' ? 'active' : ''}`}
