@@ -7,7 +7,6 @@ import {
   Calendar,
   CreditCard,
   BarChart3,
-  User as UserIcon,
   LogOut,
   LogIn,
   UserPlus,
@@ -90,18 +89,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <BarChart3 size={16} />
               <span>Reports</span>
             </button>
-            <button
-              className={`nav-btn ${activeView === 'profile' ? 'active' : ''}`}
-              onClick={() => onNavigate('profile')}
-              id="nav-btn-profile"
-            >
-              <UserIcon size={16} />
-              <span>My Profile</span>
-            </button>
-
             <div className="nav-divider"></div>
 
-            <div className="user-pill" onClick={() => onNavigate('profile')}>
+            <div
+              className={`user-pill ${activeView === 'profile' ? 'active' : ''}`}
+              onClick={() => onNavigate('profile')}
+              title="View Profile & Diagnostics"
+              id="nav-user-profile-pill"
+            >
               <span className="user-avatar">{currentUser.fullName.charAt(0).toUpperCase()}</span>
               <div className="user-meta">
                 <span className="user-name">{currentUser.fullName}</span>
