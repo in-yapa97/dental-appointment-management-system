@@ -2,6 +2,8 @@ package com.dental.management.repository;
 
 import com.dental.management.entity.Dentist;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,4 +38,18 @@ public interface DentistRepository extends JpaRepository<Dentist, Long> {
      * @return List of active/inactive dentists
      */
     List<Dentist> findByActive(boolean active);
+
+    /**
+     * Multi-field search across dentist number, full name, specialization, phone, and email.
+     *
+     * @param keyword search keyword
+     * @return list of matching dentists
+     */
+    @Query("SELECT d FROM Dentist d WHERE " +
+            "LOWER(d.dentistNumber) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.specialization) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.phone) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(d.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Dentist> searchDentists(@Param("keyword") String keyword);
 }
