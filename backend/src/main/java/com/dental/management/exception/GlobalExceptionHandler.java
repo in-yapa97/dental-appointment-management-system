@@ -70,6 +70,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
     }
 
+    @ExceptionHandler(DuplicateDentistNumberException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateDentistNumber(DuplicateDentistNumberException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Dentist Number Already Exists");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
+    @ExceptionHandler(DentistDeletionException.class)
+    public ResponseEntity<Map<String, Object>> handleDentistDeletion(DentistDeletionException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", Instant.now());
+        errorBody.put("status", HttpStatus.CONFLICT.value());
+        errorBody.put("error", "Cannot Delete Dentist");
+        errorBody.put("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody);
+    }
+
     @ExceptionHandler(DentistUnavailableException.class)
     public ResponseEntity<Map<String, Object>> handleDentistUnavailable(DentistUnavailableException ex) {
         Map<String, Object> errorBody = new HashMap<>();

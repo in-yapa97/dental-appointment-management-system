@@ -14,11 +14,13 @@ import {
   UserPlus,
   Receipt,
   Sparkles,
+  Stethoscope,
+  BookOpen,
 } from 'lucide-react';
 
 interface DashboardPageProps {
   currentUser: User;
-  onNavigate: (view: 'dashboard' | 'patients' | 'appointments' | 'billing' | 'reports') => void;
+  onNavigate: (view: 'dashboard' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'help') => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNavigate }) => {
@@ -95,6 +97,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
             <UserPlus size={16} />
             <span>Add Patient</span>
           </button>
+          <button className="btn-secondary" onClick={() => onNavigate('help')} title="Open Staff Help Guide">
+            <BookOpen size={16} />
+            <span>Staff Guide</span>
+          </button>
         </div>
       </div>
 
@@ -144,7 +150,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
                   <DollarSign size={20} />
                 </div>
               </div>
-              <span className="kpi-value">${totalRevenue.toFixed(2)}</span>
+              <span className="kpi-value">LKR {totalRevenue.toFixed(2)}</span>
               <div className="kpi-footer">
                 <span className="kpi-subtext">{bills.length} invoices issued</span>
                 <ArrowRight size={14} className="kpi-arrow" />
@@ -173,6 +179,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
               <button className="action-chip" onClick={() => onNavigate('patients')}>
                 <Users size={16} className="chip-icon" />
                 <span>Patient Directory</span>
+              </button>
+              <button className="action-chip" onClick={() => onNavigate('dentists')}>
+                <Stethoscope size={16} className="chip-icon" />
+                <span>Dentist Directory</span>
               </button>
               <button className="action-chip" onClick={() => onNavigate('appointments')}>
                 <Calendar size={16} className="chip-icon" />
@@ -279,7 +289,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
                             <div className="text-xs text-muted">{b.billDate}</div>
                           </td>
                           <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                            ${Number(b.totalAmount).toFixed(2)}
+                            LKR {Number(b.totalAmount).toFixed(2)}
                           </td>
                           <td>
                             <span className={`status-badge badge-status-${b.status.toLowerCase()}`}>

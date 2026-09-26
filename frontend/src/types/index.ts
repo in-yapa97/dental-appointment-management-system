@@ -126,6 +126,26 @@ export interface DentistLookup {
   active: boolean;
 }
 
+export interface Dentist {
+  id: number;
+  dentistNumber: string;
+  fullName: string;
+  specialization: string;
+  phone: string;
+  email?: string | null;
+  active: boolean;
+  createdAt?: string;
+}
+
+export interface DentistRequest {
+  dentistNumber: string;
+  fullName: string;
+  specialization: string;
+  phone: string;
+  email?: string;
+  active: boolean;
+}
+
 export interface TreatmentLookup {
   id: number;
   treatmentCode: string;

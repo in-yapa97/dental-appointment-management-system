@@ -9,7 +9,6 @@ jobs:
   deploy:
     name: Production Deployment & Verification
     runs-on: ubuntu-latest
-    needs: []
 
     steps:
       - name: Checkout Code
@@ -34,11 +33,8 @@ jobs:
           cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests
           cd ../frontend && npm install && npm run build
 
-      - name: Deployment Instructions & Secret Injection
+      - name: Verify Live Railway Backend Health
         run: |
-          echo "Deploying Spring Boot backend with DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET, FRONTEND_URL..."
-          echo "Deploying React Vite frontend with VITE_API_URL..."
+          echo "Verifying production backend health check endpoint..."
+          curl --fail --retry 5 --retry-delay 5 -s https://dental-appointment-management-system-production.up.railway.app/api/v1/health
 
-      - name: Production Backend Health Verification
-        run: |
-          echo "Verifying backend health check endpoint (/api/v1/health)..."

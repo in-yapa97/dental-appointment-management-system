@@ -82,3 +82,18 @@ coverage/
 .nyc_output
 backend/target/surefire-reports/
 backend/target/site/
+
+# -----------------------------------------------------------------------------
+# Academic Reports, Artifacts & Python Utilities
+# -----------------------------------------------------------------------------
+*.docx
+*.pdf
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*backup*/
+backup*/
+*_backup/
+

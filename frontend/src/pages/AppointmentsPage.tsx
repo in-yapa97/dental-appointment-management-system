@@ -402,7 +402,7 @@ export const AppointmentsPage: React.FC = () => {
                   <td>
                     <div className="patient-name-cell">
                       <span className="cell-fullname">{a.treatmentName}</span>
-                      <span className="cell-subtext">${Number(a.treatmentCost).toFixed(2)}</span>
+                      <span className="cell-subtext">LKR {Number(a.treatmentCost).toFixed(2)}</span>
                     </div>
                   </td>
                   <td>
@@ -514,7 +514,7 @@ export const AppointmentsPage: React.FC = () => {
                   >
                     <option value={0}>-- Select Procedure --</option>
                     {treatments.map((t) => (
-                      <option key={t.id} value={t.id}>{t.treatmentName} (${Number(t.cost).toFixed(2)})</option>
+                      <option key={t.id} value={t.id}>{t.treatmentName} (LKR {Number(t.cost).toFixed(2)})</option>
                     ))}
                   </select>
                 </div>
@@ -657,7 +657,7 @@ export const AppointmentsPage: React.FC = () => {
               </div>
               <div className="detail-item">
                 <span className="detail-label">Estimated Cost</span>
-                <span className="detail-value">${Number(viewingAppointment.treatmentCost).toFixed(2)}</span>
+                <span className="detail-value">LKR {Number(viewingAppointment.treatmentCost).toFixed(2)}</span>
               </div>
               <div className="detail-item" style={{ gridColumn: 'span 2' }}>
                 <span className="detail-label">Notes</span>

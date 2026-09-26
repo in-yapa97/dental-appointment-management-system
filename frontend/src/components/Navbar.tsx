@@ -7,17 +7,17 @@ import {
   Calendar,
   CreditCard,
   BarChart3,
-  User as UserIcon,
-  ActivitySquare,
+  HelpCircle,
   LogOut,
   LogIn,
   UserPlus,
+  Stethoscope,
 } from 'lucide-react';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard';
-  onNavigate: (view: 'login' | 'register' | 'profile' | 'health' | 'patients' | 'appointments' | 'billing' | 'reports' | 'dashboard') => void;
+  activeView: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard' | 'help';
+  onNavigate: (view: 'login' | 'register' | 'profile' | 'patients' | 'dentists' | 'appointments' | 'billing' | 'reports' | 'dashboard' | 'help') => void;
   onLogout: () => void;
 }
 
@@ -59,6 +59,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Patients</span>
             </button>
             <button
+              className={`nav-btn ${activeView === 'dentists' ? 'active' : ''}`}
+              onClick={() => onNavigate('dentists')}
+              id="nav-btn-dentists"
+            >
+              <Stethoscope size={16} />
+              <span>Dentists</span>
+            </button>
+            <button
               className={`nav-btn ${activeView === 'appointments' ? 'active' : ''}`}
               onClick={() => onNavigate('appointments')}
               id="nav-btn-appointments"
@@ -83,25 +91,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Reports</span>
             </button>
             <button
-              className={`nav-btn ${activeView === 'profile' ? 'active' : ''}`}
-              onClick={() => onNavigate('profile')}
-              id="nav-btn-profile"
+              className={`nav-btn ${activeView === 'help' ? 'active' : ''}`}
+              onClick={() => onNavigate('help')}
+              id="nav-btn-help"
             >
-              <UserIcon size={16} />
-              <span>My Profile</span>
+              <HelpCircle size={16} />
+              <span>Help</span>
             </button>
-            <button
-              className={`nav-btn ${activeView === 'health' ? 'active' : ''}`}
-              onClick={() => onNavigate('health')}
-              id="nav-btn-health"
-            >
-              <ActivitySquare size={16} />
-              <span>System Status</span>
-            </button>
-
             <div className="nav-divider"></div>
 
-            <div className="user-pill" onClick={() => onNavigate('profile')}>
+            <div
+              className={`user-pill ${activeView === 'profile' ? 'active' : ''}`}
+              onClick={() => onNavigate('profile')}
+              title="View Profile & Diagnostics"
+              id="nav-user-profile-pill"
+            >
               <span className="user-avatar">{currentUser.fullName.charAt(0).toUpperCase()}</span>
               <div className="user-meta">
                 <span className="user-name">{currentUser.fullName}</span>

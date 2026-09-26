@@ -141,6 +141,12 @@
   border-color: #cbd5e1;
 }
 
+.user-pill.active {
+  background-color: #f0f9ff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
 .user-avatar {
   width: 28px;
   height: 28px;

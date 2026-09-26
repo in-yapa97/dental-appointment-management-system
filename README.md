@@ -368,35 +368,87 @@ dental-appointment-management-system/
 
 ### Architecture Overview
 - **Frontend Host**: **Vercel** (Vite Single Page Application)
-- **Backend Host**: **Railway** (Spring Boot 3.3.4 executable container / JAR)
-- **Database**: Managed **PostgreSQL 17** relational database instance
+- **Backend Host**: **Railway** (Spring Boot 3.3.4 container built via `backend/Dockerfile`)
+- **Database**: Managed **PostgreSQL 17** instance on Railway
 - **CI/CD Automation**: GitHub Actions (`.github/workflows/ci.yml` & `.github/workflows/deploy.yml`)
+- **REST Endpoints**: 29 production-ready endpoints across 6 functional domains
+
+### Step-by-Step Railway Backend & PostgreSQL Deployment
+
+Follow these steps to deploy the Spring Boot backend and PostgreSQL database to Railway:
+
+1. **Create a Railway Project**:
+   - Log in to [Railway](https://railway.app/) and create a **New Project**.
+
+2. **Add Managed PostgreSQL Database**:
+   - In your project canvas, click **Create** / **New Service** -> **Database** -> **Add PostgreSQL**.
+   - Railway will provision a PostgreSQL 17 instance and automatically set up connection variables (`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `DATABASE_URL`).
+
+3. **Add Backend Service from GitHub**:
+   - In the same Railway project, click **Create** / **New Service** -> **GitHub Repo**.
+   - Select the repository: `in-yapa97/dental-appointment-management-system`.
+
+4. **Configure Backend Service Settings (Crucial)**:
+   - Click on the newly created backend service and navigate to the **Settings** tab.
+   - In the **Root Directory** field, set:
+     ```text
+     backend
+     ```
+   - Railway will automatically detect `backend/Dockerfile` and execute the multi-stage Docker build with `backend/` as the build context.
+
+5. **Configure Environment Variables**:
+   In the backend service **Variables** tab, configure the following environment variables:
+
+   | Variable | Value / Format | Purpose |
+   | :--- | :--- | :--- |
+   | `JPA_DDL_AUTO` | `update` | Safely manages schema updates without dropping existing data |
+   | `JWT_SECRET` | `<BASE64_ENCODED_256BIT_SECRET>` | 256-bit secret key used by Spring Security for HMAC-SHA256 JWT validation |
+   | `JWT_EXPIRATION_MS` | `86400000` | JWT validity period (24 hours) |
+   | `CORS_ALLOWED_ORIGINS` | `https://<your-frontend-app>.vercel.app` | Production frontend domain permitted for cross-origin requests |
+
+   > [!NOTE]
+   > **PORT Handling**: Do not hardcode port 8080. Railway dynamically assigns a listening port via the `PORT` environment variable. Spring Boot automatically binds to `${PORT:${SERVER_PORT:8080}}`.
+   >
+   > **PostgreSQL Configuration**: The backend supports Railway's native PostgreSQL variables (`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`) as well as explicit JDBC variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`). You can link the database service variables into the backend service:
+   > - Via Railway service variable reference:
+   >   - `PGHOST` = `${{Postgres.PGHOST}}`
+   >   - `PGPORT` = `${{Postgres.PGPORT}}`
+   >   - `PGDATABASE` = `${{Postgres.PGDATABASE}}`
+   >   - `PGUSER` = `${{Postgres.PGUSER}}`
+   >   - `PGPASSWORD` = `${{Postgres.PGPASSWORD}}`
+   > - Or via explicit JDBC URL:
+   >   - `DB_URL` = `jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}`
+   >   - `DB_USERNAME` = `${{Postgres.PGUSER}}`
+   >   - `DB_PASSWORD` = `${{Postgres.PGPASSWORD}}`
+   > *(Note: Do NOT set `DB_URL` to Railway's raw `DATABASE_URL` without the `jdbc:` prefix, as Java JDBC requires `jdbc:postgresql://`)*.
+
+6. **Generate Public Domain & Verify Health**:
+   - In the backend service **Settings** tab, scroll to **Networking** -> **Public Networking**.
+   - Click **Generate Domain**.
+   - Copy the public Railway URL (e.g., `https://dental-management-backend-production.up.railway.app`).
+   - Verify health by opening:
+     ```text
+     https://<your-backend-service>.up.railway.app/api/v1/health
+     ```
+     Expected response: `{"status":"UP"}`.
+
+---
 
 ### Frontend Deployment (Vercel)
-- **Platform**: Vercel
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Configuration File**: `frontend/vercel.json`
-- **Required Environment Variable**:
-  ```env
-  VITE_API_BASE_URL=https://<your-backend-service>.up.railway.app
-  ```
 
-### Backend Deployment (Railway)
-- **Platform**: Railway / Docker
-- **Java Runtime**: OpenJDK 17 LTS
-- **Build & Start**: `./mvnw clean package -DskipTests` -> `java -jar target/dental-management-backend-0.0.1-SNAPSHOT.jar`
-- **Required Environment Variables**:
-  ```env
-  SERVER_PORT=8080
-  DB_URL=jdbc:postgresql://<HOST>:<PORT>/<DB_NAME>
-  DB_USERNAME=<DB_USER>
-  DB_PASSWORD=<DB_PASSWORD>
-  JPA_DDL_AUTO=update
-  JWT_SECRET=<BASE64_ENCODED_256BIT_SECRET>
-  JWT_EXPIRATION_MS=86400000
-  CORS_ALLOWED_ORIGINS=https://<your-frontend-app>.vercel.app
-  ```
+1. Connect your GitHub repository to **Vercel**.
+2. Set **Root Directory** to `frontend`.
+3. Framework Preset: **Vite**.
+4. Build Command: `npm run build`.
+5. Output Directory: `dist`.
+6. Configuration File: `frontend/vercel.json` (handles SPA client-side routing).
+7. Set Environment Variable in Vercel:
+   ```env
+   VITE_API_BASE_URL=https://<your-backend-service>.up.railway.app
+   ```
+8. Deploy. Vercel will build the frontend assets and connect to the Railway backend API.
+
+---
 
 ### Database Deployment Readiness
 - **Database Engine**: PostgreSQL 17
