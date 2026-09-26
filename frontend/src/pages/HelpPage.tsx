@@ -162,7 +162,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         stepNumber: 2,
         stepTitle: 'Automatic Fee Calculation',
-        instructions: 'The system automatically pulls the procedure cost (e.g., $150.00 for Extraction) and adds the Consultation Fee ($50.00) to calculate the Total Amount ($200.00).',
+        instructions: 'The system automatically pulls the procedure cost (e.g., LKR 150.00 for Extraction) and adds the Consultation Fee (LKR 50.00) to calculate the Total Amount (LKR 200.00).',
         tip: 'Staff can customize the Consultation Fee if special clinic discounts apply.',
       },
       {

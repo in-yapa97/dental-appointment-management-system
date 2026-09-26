@@ -109,13 +109,13 @@ export const ReportsPage: React.FC = () => {
                     <TrendingUp size={20} />
                   </div>
                 </div>
-                <span className="kpi-value">${Number(revenueReport.totalRevenue).toFixed(2)}</span>
+                <span className="kpi-value">LKR {Number(revenueReport.totalRevenue).toFixed(2)}</span>
                 <span className="kpi-subtext">{revenueReport.paidBills} Invoices Paid</span>
               </div>
 
               <div className="kpi-card kpi-amber">
                 <span className="kpi-label">Outstanding Receivables</span>
-                <span className="kpi-value">${Number(revenueReport.unpaidAmount).toFixed(2)}</span>
+                <span className="kpi-value">LKR {Number(revenueReport.unpaidAmount).toFixed(2)}</span>
                 <span className="kpi-subtext">{revenueReport.pendingBills} Pending Payments</span>
               </div>
 
@@ -144,7 +144,7 @@ export const ReportsPage: React.FC = () => {
               <div className="report-card-header">
                 <h3>Payment Status Breakdown</h3>
                 <span className="text-muted text-sm">
-                  Total Volume: ${paymentStatusReport ? Number(paymentStatusReport.totalAmount).toFixed(2) : '0.00'}
+                  Total Volume: LKR {paymentStatusReport ? Number(paymentStatusReport.totalAmount).toFixed(2) : '0.00'}
                 </span>
               </div>
 
@@ -160,7 +160,7 @@ export const ReportsPage: React.FC = () => {
                       <div className="status-progress-header">
                         <span className="status-tag font-semibold">{item.status}</span>
                         <span className="status-amount">
-                          ${Number(item.totalAmount).toFixed(2)}{' '}
+                          LKR {Number(item.totalAmount).toFixed(2)}{' '}
                           <small className="text-muted">({item.count} bills - {percent}%)</small>
                         </span>
                       </div>
@@ -203,7 +203,7 @@ export const ReportsPage: React.FC = () => {
                           <td className="text-muted text-xs">{item.treatmentCode}</td>
                           <td style={{ textAlign: 'center' }}>{item.billCount}</td>
                           <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                            ${Number(item.totalRevenue).toFixed(2)}
+                            LKR {Number(item.totalRevenue).toFixed(2)}
                           </td>
                         </tr>
                       ))}

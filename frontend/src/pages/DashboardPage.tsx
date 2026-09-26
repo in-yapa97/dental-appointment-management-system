@@ -150,7 +150,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
                   <DollarSign size={20} />
                 </div>
               </div>
-              <span className="kpi-value">${totalRevenue.toFixed(2)}</span>
+              <span className="kpi-value">LKR {totalRevenue.toFixed(2)}</span>
               <div className="kpi-footer">
                 <span className="kpi-subtext">{bills.length} invoices issued</span>
                 <ArrowRight size={14} className="kpi-arrow" />
@@ -289,7 +289,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ currentUser, onNav
                             <div className="text-xs text-muted">{b.billDate}</div>
                           </td>
                           <td style={{ textAlign: 'right', fontWeight: 600 }}>
-                            ${Number(b.totalAmount).toFixed(2)}
+                            LKR {Number(b.totalAmount).toFixed(2)}
                           </td>
                           <td>
                             <span className={`status-badge badge-status-${b.status.toLowerCase()}`}>

@@ -129,7 +129,7 @@ export const BillingPage: React.FC = () => {
       };
 
       const created = await billingService.createBill(payload);
-      setNotice(`Bill #${created.billNumber} created successfully! Total: $${Number(created.totalAmount).toFixed(2)}`);
+      setNotice(`Bill #${created.billNumber} created successfully! Total: LKR ${Number(created.totalAmount).toFixed(2)}`);
       setShowCreateModal(false);
       fetchBills();
     } catch (err: unknown) {
@@ -251,7 +251,7 @@ export const BillingPage: React.FC = () => {
               <CreditCard size={20} />
             </div>
           </div>
-          <span className="kpi-value">${totalBilled.toFixed(2)}</span>
+          <span className="kpi-value">LKR {totalBilled.toFixed(2)}</span>
           <div className="kpi-footer">
             <span className="kpi-subtext">{bills.length} total bills</span>
           </div>
@@ -263,7 +263,7 @@ export const BillingPage: React.FC = () => {
               <DollarSign size={20} />
             </div>
           </div>
-          <span className="kpi-value">${totalCollected.toFixed(2)}</span>
+          <span className="kpi-value">LKR {totalCollected.toFixed(2)}</span>
           <div className="kpi-footer">
             <span className="kpi-subtext">{bills.filter((b) => b.status === 'PAID').length} paid bills</span>
           </div>
@@ -275,7 +275,7 @@ export const BillingPage: React.FC = () => {
               <Clock size={20} />
             </div>
           </div>
-          <span className="kpi-value">${pendingAmount.toFixed(2)}</span>
+          <span className="kpi-value">LKR {pendingAmount.toFixed(2)}</span>
           <div className="kpi-footer">
             <span className="kpi-subtext">{bills.filter((b) => b.status === 'PENDING').length} awaiting payment</span>
           </div>
@@ -393,13 +393,13 @@ export const BillingPage: React.FC = () => {
                     </div>
                   </td>
                   <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                    ${Number(bill.consultationFee).toFixed(2)}
+                    LKR {Number(bill.consultationFee).toFixed(2)}
                   </td>
                   <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                    ${Number(bill.treatmentAmount).toFixed(2)}
+                    LKR {Number(bill.treatmentAmount).toFixed(2)}
                   </td>
                   <td style={{ textAlign: 'right', whiteSpace: 'nowrap', fontWeight: 700, color: '#0284c7' }}>
-                    ${Number(bill.totalAmount).toFixed(2)}
+                    LKR {Number(bill.totalAmount).toFixed(2)}
                   </td>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <span className={`status-badge ${getStatusBadgeClass(bill.status)}`}>
@@ -509,7 +509,7 @@ export const BillingPage: React.FC = () => {
                       <div className="preview-card" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem 1rem', fontSize: '0.875rem' }}>
                         <div><strong>Patient:</strong> {appt.patientName} ({appt.patientNumber})</div>
                         <div><strong>Dentist:</strong> {appt.dentistName}</div>
-                        <div><strong>Treatment:</strong> {appt.treatmentName} (${Number(appt.treatmentCost).toFixed(2)})</div>
+                        <div><strong>Treatment:</strong> {appt.treatmentName} (LKR {Number(appt.treatmentCost).toFixed(2)})</div>
                         <div><strong>Date/Time:</strong> {appt.appointmentDate} at {appt.appointmentTime}</div>
                       </div>
                     );
@@ -519,7 +519,7 @@ export const BillingPage: React.FC = () => {
 
               <div className="form-row-2">
                 <div className="form-group">
-                  <label className="form-label">Consultation Fee ($)</label>
+                  <label className="form-label">Consultation Fee (LKR)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -531,7 +531,7 @@ export const BillingPage: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Treatment Amount ($)</label>
+                  <label className="form-label">Treatment Amount (LKR)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -572,7 +572,7 @@ export const BillingPage: React.FC = () => {
               <div className="live-total-box" style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '0.85rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
                 <span style={{ fontWeight: 600, color: '#0369a1' }}>Grand Total:</span>
                 <span className="live-total-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0284c7' }}>
-                  ${(Number(consultationFee || 0) + Number(treatmentAmount || 0)).toFixed(2)}
+                  LKR {(Number(consultationFee || 0) + Number(treatmentAmount || 0)).toFixed(2)}
                 </span>
               </div>
 
@@ -719,7 +719,7 @@ export const BillingPage: React.FC = () => {
                       <div>Consultation / Examination Fee</div>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      ${Number(viewingReceipt.consultationFee).toFixed(2)}
+                      LKR {Number(viewingReceipt.consultationFee).toFixed(2)}
                     </td>
                   </tr>
                   <tr>
@@ -728,7 +728,7 @@ export const BillingPage: React.FC = () => {
                       <small className="text-muted">Code: {viewingReceipt.treatmentCode}</small>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      ${Number(viewingReceipt.treatmentAmount).toFixed(2)}
+                      LKR {Number(viewingReceipt.treatmentAmount).toFixed(2)}
                     </td>
                   </tr>
                 </tbody>
@@ -736,7 +736,7 @@ export const BillingPage: React.FC = () => {
                   <tr className="receipt-total-row">
                     <td>TOTAL AMOUNT PAID</td>
                     <td style={{ textAlign: 'right' }}>
-                      ${Number(viewingReceipt.totalAmount).toFixed(2)}
+                      LKR {Number(viewingReceipt.totalAmount).toFixed(2)}
                     </td>
                   </tr>
                 </tfoot>
